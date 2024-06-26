@@ -1,0 +1,18 @@
+{
+    "name": "GameWorldFeature",
+    "rootNamespace": "Genesis",
+    "references": [
+        "GUID:3377deebfb0acde45876d12c6e3d27cc",
+        "GUID:948753f2305af1e44899e56f772a862b",
+        "GUID:d0e3b94c7c8c7484aaaf99291b9c3543"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
