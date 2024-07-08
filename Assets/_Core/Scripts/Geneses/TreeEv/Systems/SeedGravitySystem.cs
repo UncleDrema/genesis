@@ -1,5 +1,4 @@
 ﻿using Genesis.Common.Components;
-using Genesis.GameWorld;
 using Genesis.GameWorld.Events;
 
 namespace Geneses.TreeEv.Systems

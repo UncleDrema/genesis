@@ -1,8 +1,5 @@
-﻿using Scellecs.Morpeh.Addons.Systems;
-
-namespace Geneses.TreeEv.Systems
+﻿namespace Geneses.TreeEv.Systems
 {
-    using Scellecs.Morpeh;
     using Scellecs.Morpeh.Addons.Systems;
     using Unity.IL2CPP.CompilerServices;
 

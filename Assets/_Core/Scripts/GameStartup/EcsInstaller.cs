@@ -1,5 +1,6 @@
 ﻿using System;
 using Geneses.Blank;
+using Geneses.GameOfLife;
 using Geneses.TreeEv;
 using Genesis.Drawing;
 using Genesis.GameWorld;
@@ -26,7 +27,7 @@ namespace Genesis.GameStartup
         {
             return new UpdateFeature[]
             {
-                _container.CreateFeature<TreeEvFeature>(),
+                _container.CreateFeature<GameOfLifeFeature>(),
                 _container.CreateFeature<GameWorldFeature>(),
                 _container.CreateFeature<DrawingFeature>(),
             };

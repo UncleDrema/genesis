@@ -316,8 +316,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serializedData:
     Renderer: {fileID: 140380789}
-    ScaleX: 1
-    ScaleY: 1
+    ScaleX: 128
+    ScaleY: 128
 --- !u!114 &140380795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -466,7 +466,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serializedData:
     Width: 128
-    Height: 16
+    Height: 128
 --- !u!4 &1255775773
 Transform:
   m_ObjectHideFlags: 0
