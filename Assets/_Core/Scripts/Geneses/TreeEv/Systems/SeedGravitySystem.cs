@@ -1,5 +1,7 @@
-﻿using Genesis.Common.Components;
+﻿using System.Collections.Generic;
+using Genesis.Common.Components;
 using Genesis.GameWorld.Events;
+using UnityEngine;
 
 namespace Geneses.TreeEv.Systems
 {
@@ -40,25 +42,57 @@ namespace Geneses.TreeEv.Systems
                         for (int j = 2; j < height; j++)
                         {
                             var pixel = (TreeEvPixel) pixels[i][j];
-                            if (pixel.Type == PixelType.Fruit && pixel.Gene == -2)
+                            if (pixel.Type is PixelType.Fruit && pixel.Gene is -2)
                             {
                                 pixel.Type = PixelType.Seed;
                             }
-                            else if (pixel.Type == PixelType.Seed && pixel.Under.Type == PixelType.Empty)
+                            else if (pixel.Type is PixelType.Seed && pixel.Under.Type is PixelType.Empty)
                             {
-                                pixel.Type = PixelType.Empty;
-                                pixel.Under.Type = PixelType.Seed;
                                 pixel.Under.GeneticCode = pixel.GeneticCode;
-                                pixel.GeneticCode = null;
-                            }
-                            else if (pixel.Type == PixelType.Seed && pixel.Under.Type != PixelType.Wall)
-                            {
+                                pixel.Under.Type = PixelType.Seed;
                                 pixel.Type = PixelType.Empty;
+                            }
+                            else if (pixel.Type is PixelType.Seed && pixel.Under.Type is PixelType.Seed)
+                            {
+                                pixel.Under.GeneticCode = Mutate(pixel.GeneticCode, pixel.Under.GeneticCode);
+                                pixel.Type = PixelType.Empty;
+                            }
+                            else if (pixel.Type is PixelType.Seed && pixel.Under.Type is not PixelType.Wall)
+                            {
+                                /*
+                                if (!pixel.IsSiblingOf(pixel.Under))
+                                {
+                                    pixel.Type = PixelType.Empty;
+                                    pixel.GeneticCode = null;
+                                }
+                                */
                             }
                         }
                     }
                 }
             }
+        }
+
+        private Dictionary<int, int[]> Mutate(Dictionary<int, int[]> a, Dictionary<int, int[]> b)
+        {
+            var res = new Dictionary<int, int[]>();
+            for (int i = 0; i < 32; i++)
+            {
+                var arr = new int[4] { 0, 0, 0, 0 };
+                res[i] = arr;
+                for (int j = 0; j < 4; j++)
+                {
+                    if (Random.value < 0.95f)
+                    {
+                        arr[j] = Random.value < 0.5f ? a[i][j] : b[i][j];
+                    }
+                    else
+                    {
+                        arr[j] = (int)(Random.value * 64);
+                    }
+                }
+            }
+            return res;
         }
     }
 }

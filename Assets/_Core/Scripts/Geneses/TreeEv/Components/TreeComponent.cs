@@ -13,9 +13,11 @@ namespace Geneses.TreeEv.Components
     [Serializable]
     public struct TreeComponent : IComponent
     {
+        public string TreeId;
         public Dictionary<int, int[]> GeneticCode;
         public int Energy;
         public bool IsAlive;
+        public int Age;
         public TreeEvPixel Root;
         public FastList<TreeEvPixel> Body;
     }

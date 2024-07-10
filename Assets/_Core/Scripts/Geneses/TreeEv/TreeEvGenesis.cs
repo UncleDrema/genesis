@@ -1,5 +1,6 @@
 ﻿using Genesis.Common.Components;
 using Genesis.GameWorld;
+using UnityEngine;
 
 namespace Geneses.TreeEv
 {
@@ -32,12 +33,17 @@ namespace Geneses.TreeEv
 
         private static PixelType GetType(int width, int height, int x, int y)
         {
-            if (y == 0 || y == width - 1)
+            if (y == 0 || y == width - 1 || Distance((float)width / 2, 0, x, y * 2) < 128)
             {
                 return PixelType.Wall;
             }
 
             return PixelType.Empty;
+        }
+
+        private static float Distance(float x0, float y0, float x1, float y1)
+        {
+            return Vector2.Distance(new Vector2(x0, y0), new Vector2(x1, y1));
         }
     }
 }

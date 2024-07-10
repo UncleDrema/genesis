@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Geneses.TreeEv.Components;
 using Genesis.Common.Components;
 using Genesis.GameWorld;
@@ -40,10 +41,12 @@ namespace Geneses.TreeEv.Systems
                 foreach (var world in _world)
                 {
                     ref var cWorld = ref world.GetComponent<WorldComponent>();
+                    
                     foreach (var tree in _trees)
                     {
                         IterateTree(tree);
                     }
+
                     cWorld.ForEach<TreeEvPixel>((x, y, pixel) =>
                     {
                         if (pixel.Under.Type == PixelType.Wall && pixel.Type == PixelType.Seed)
@@ -64,15 +67,18 @@ namespace Geneses.TreeEv.Systems
             cTree.GeneticCode = geneticCode;
             cTree.IsAlive = true;
             cTree.Root = root;
+            cTree.Age = 0;
+            cTree.TreeId = Guid.NewGuid().ToString();
             cTree.Body = new FastList<TreeEvPixel>();
-            cTree.Body.Add(root);
+            root.AddToTree(ref cTree);
             cTree.Energy = 5000;
         }
 
         private void IterateTree(Entity tree)
         {
             ref var cTree = ref tree.GetComponent<TreeComponent>();
-            cTree.Energy -= cTree.Body.length - 1;
+            cTree.Age++;
+            cTree.Energy -= cTree.Body.length * (Math.Max(1, cTree.Age - 100));
             if (cTree.Energy <= 0)
             {
                 KillTree(ref cTree);
@@ -88,7 +94,7 @@ namespace Geneses.TreeEv.Systems
         {
             foreach (var treePixel in cTree.Body)
             {
-                if (treePixel.Type == PixelType.Sprout)
+                if (treePixel.Type is PixelType.Sprout)
                 {
                     treePixel.ExpressGene(ref cTree);
                     treePixel.Type = PixelType.Tree;

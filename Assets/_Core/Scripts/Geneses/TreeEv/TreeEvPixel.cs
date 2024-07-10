@@ -21,6 +21,11 @@ namespace Geneses.TreeEv
             {
                 IsDirty = true;
                 _type = value;
+                if (_type is PixelType.Empty)
+                {
+                    GeneticCode = null;
+                    TreeId = null;
+                }
             }
         }
         public int Gene { get; set; }
@@ -31,6 +36,7 @@ namespace Geneses.TreeEv
         public TreeEvPixel Right { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
+        public string TreeId { get; set; }
 
         public void ExpressGene(ref TreeComponent cTree)
         {
@@ -54,7 +60,7 @@ namespace Geneses.TreeEv
                 {
                     pixel.Type = PixelType.Sprout;
                     pixel.Gene = gene;
-                    cTree.Body.Add(pixel);
+                    pixel.AddToTree(ref cTree);
                 }
             }
         }
@@ -65,9 +71,20 @@ namespace Geneses.TreeEv
             {
                 Under.Type = PixelType.Fruit;
                 Under.GeneticCode = cTree.Root.GeneticCode;
-                cTree.Body.Add(Under);
+                Under.AddToTree(ref cTree);
                 cTree.Energy -= 500;
             }
+        }
+
+        public void AddToTree(ref TreeComponent cTree)
+        {
+            TreeId = cTree.TreeId;
+            cTree.Body.Add(this);
+        }
+
+        public bool IsSiblingOf(TreeEvPixel other)
+        {
+            return TreeId != null && other.TreeId != null && TreeId == other.TreeId;
         }
     }
 }
