@@ -39,12 +39,14 @@ namespace Genesis.Drawing.Systems
                 
                 cCanvas.Texture2D = new Texture2D(cCanvas.Width, cCanvas.Height);
                 cCanvas.Texture2D.filterMode = FilterMode.Point;
-                cRenderer.Renderer.material.mainTexture = cCanvas.Texture2D;
+                cRenderer.RawImage.texture = cCanvas.Texture2D;
                 
-                var transform = cRenderer.Renderer.transform;
+                /*
                 var scale = transform.localScale;
-                var newScale = new Vector3(scale.x / cRenderer.ScaleX * cReq.Width, scale.y, scale.z / cRenderer.ScaleY * cReq.Width);
+                var ratio = (float) cReq.Height / cReq.Width;
+                var newScale = new Vector3(scale.x, scale.y, scale.z * ratio);
                 transform.localScale = newScale;
+                */
 
                 ref var cClear = ref initRequest.AddComponent<ClearCanvasRequest>();
                 cClear.Color = Color.white;

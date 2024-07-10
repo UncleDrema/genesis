@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Genesis.Drawing.Components
 {
@@ -12,7 +13,7 @@ namespace Genesis.Drawing.Components
     [Serializable]
     internal struct RendererComponent : IComponent
     {
-        public Renderer Renderer;
+        public RawImage RawImage;
         public int ScaleX;
         public int ScaleY;
     }

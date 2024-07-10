@@ -35,7 +35,7 @@ namespace Geneses.TreeEv.Systems
                     var height = cWorld.Height;
                     var width = cWorld.Width;
                     var pixels = cWorld.Pixels;
-                    for (int i = 0; i < width; i++)
+                    for (int i = width - 1; i >= 0; i--)
                     {
                         for (int j = 2; j < height; j++)
                         {
@@ -43,20 +43,17 @@ namespace Geneses.TreeEv.Systems
                             if (pixel.Type == PixelType.Fruit && pixel.Gene == -2)
                             {
                                 pixel.Type = PixelType.Seed;
-                                pixel.IsDirty = true;
                             }
                             else if (pixel.Type == PixelType.Seed && pixel.Under.Type == PixelType.Empty)
                             {
                                 pixel.Type = PixelType.Empty;
-                                pixel.IsDirty = true;
                                 pixel.Under.Type = PixelType.Seed;
-                                pixel.Under.IsDirty = true;
-                                // TODO: передвинуть генетический код из пикселя вниз и очистить в предыдущей клетке
+                                pixel.Under.GeneticCode = pixel.GeneticCode;
+                                pixel.GeneticCode = null;
                             }
                             else if (pixel.Type == PixelType.Seed && pixel.Under.Type != PixelType.Wall)
                             {
                                 pixel.Type = PixelType.Empty;
-                                pixel.IsDirty = true;
                             }
                         }
                     }

@@ -27,8 +27,8 @@ namespace Genesis.GameStartup
         {
             return new UpdateFeature[]
             {
-                _container.CreateFeature<GameOfLifeFeature>(),
                 _container.CreateFeature<GameWorldFeature>(),
+                _container.CreateFeature<TreeEvFeature>(),
                 _container.CreateFeature<DrawingFeature>(),
             };
         }

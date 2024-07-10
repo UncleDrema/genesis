@@ -25,6 +25,8 @@ namespace Geneses.TreeEv
                 pixel.Under = (TreeEvPixel) pixels.Down(width, height, i, j);
                 pixel.Left = (TreeEvPixel) pixels.Left(width, height, i, j);
                 pixel.Right = (TreeEvPixel) pixels.Right(width, height, i, j);
+                pixel.X = i;
+                pixel.Y = j;
             });
         }
 

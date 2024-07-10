@@ -1,4 +1,5 @@
-﻿using Genesis.Common.Components;
+﻿using System.Collections.Generic;
+using Genesis.Common.Components;
 using Genesis.GameWorld.Events;
 
 namespace Geneses.TreeEv.Systems
@@ -39,7 +40,41 @@ namespace Geneses.TreeEv.Systems
         private void MakeSeed(TreeEvPixel pixel)
         {
             pixel.Type = PixelType.Seed;
-            pixel.IsDirty = true;
+            pixel.GeneticCode = new Dictionary<int, int[]>()
+            {
+                {0, new int[4]{33, 4, 33, 35}},
+                {1, new int[4]{5, 33, 6, 35}},
+                {2, new int[4]{33, 4, 33, 7}},
+                {3, new int[4]{33, 33, 5, 7}},
+                {4, new int[4]{33, 22, 33, 35}},
+                {5, new int[4]{2, 33, 33, 33}},
+                {6, new int[4]{33, 33, 3, 33}},
+                {7, new int[4]{31, 23, 20, 9}},
+                {8, new int[4]{49, 22, 61, 47}},
+                {9, new int[4]{21, 25, 42, 16}},
+                {10, new int[4]{33, 1, 33, 35}},
+                {11, new int[4]{51, 8, 74, 12}},
+                {12, new int[4]{2, 33, 2, 35}},
+                {13, new int[4]{48, 39, 63, 24}},
+                {14, new int[4]{47, 19, 73, 9}},
+                {15, new int[4]{51, 8, 74, 12}},
+                {16, new int[4]{1, 33, 1, 35}},
+                {17, new int[4]{17, 47, 10, 30}},
+                {18, new int[4]{31, 1, 9, 54}},
+                {19, new int[4]{60, 42, 68, 43}},
+                {20, new int[4]{1, 34, 14, 19}},
+                {21, new int[4]{57, 56, 14, 35}},
+                {22, new int[4]{33, 10, 33, 35}},
+                {23, new int[4]{44, 11, 6, 1}},
+                {24, new int[4]{38, 70, 76, 2}},
+                {25, new int[4]{41, 37, 26, 71}},
+                {26, new int[4]{34, 21, 51, 73}},
+                {27, new int[4]{4, 19, 13, 58}},
+                {28, new int[4]{26, 9, 24, 35}},
+                {29, new int[4]{11, 21, 66, 33}},
+                {30, new int[4]{16, 69, 65, 38}},
+                {31, new int[4]{21, 76, 15, 34}},
+            };
         }
     }
 }
