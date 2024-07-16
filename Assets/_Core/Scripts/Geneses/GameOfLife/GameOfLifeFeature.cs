@@ -1,5 +1,4 @@
-﻿using Geneses.GameOfLife.Requests;
-using Geneses.GameOfLife.Systems;
+﻿using Geneses.GameOfLife.Systems;
 using Scellecs.Morpeh.Addons.Feature;
 
 namespace Geneses.GameOfLife
@@ -8,8 +7,6 @@ namespace Geneses.GameOfLife
     {
         protected override void Initialize()
         {
-            RegisterRequest<UpdatePixelsRequest>();
-            
             AddSystem(new InitializeGameOfLifeSystem());
             AddSystem(new GameOfLifeSystem());
             AddSystem(new UpdatePixelsSystem());

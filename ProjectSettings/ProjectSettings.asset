@@ -730,7 +730,8 @@ PlayerSettings:
     Standalone: MORPEH_BURST;MORPEH_ADDONS_VCONTAINER;MORPEH
   additionalCompilerArguments: {}
   platformArchitecture: {}
-  scriptingBackend: {}
+  scriptingBackend:
+    Standalone: 1
   il2cppCompilerConfiguration: {}
   il2cppCodeGeneration: {}
   managedStrippingLevel:

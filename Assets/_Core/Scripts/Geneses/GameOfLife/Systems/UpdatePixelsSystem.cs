@@ -1,6 +1,5 @@
-﻿using Geneses.GameOfLife.Components;
-using Geneses.GameOfLife.Requests;
-using Genesis.Common.Components;
+﻿using Genesis.Common.Components;
+using Genesis.GameWorld.Events;
 using Scellecs.Morpeh;
 
 namespace Geneses.GameOfLife.Systems
@@ -14,28 +13,40 @@ namespace Geneses.GameOfLife.Systems
     internal sealed class UpdatePixelsSystem : UpdateSystem
     {
         private Filter _world;
+        private Filter _ticks;
         
         public override void OnAwake()
         {
+            _ticks = World.Filter
+                .With<TickEvent>()
+                .Build();
             _world = World.Filter
                 .With<WorldComponent>()
-                .With<UpdatePixelsComponent>()
-                .With<UpdatePixelsRequest>()
                 .Build();
         }
 
         public override void OnUpdate(float deltaTime)
         {
-            foreach (var world in _world)
+            foreach (var tick in _ticks)
             {
-                ref var cWorld = ref world.GetComponent<WorldComponent>();
-                ref var cUpdate = ref world.GetComponent<UpdatePixelsComponent>();
-                var pixels = cWorld.Pixels;
-                foreach (var update in cUpdate.PixelUpdates)
+                foreach (var world in _world)
                 {
-                    var pixel = (GameOfLifePixel) pixels[update.x][update.y];
-                    pixel.State = update.newState;
-                    pixel.IsDirty = true;
+                    ref var cWorld = ref world.GetComponent<WorldComponent>();
+                    var pixels = cWorld.Pixels;
+                    var width = cWorld.Width;
+                    var height = cWorld.Height;
+                    for (int i = 0; i < width; i++)
+                    {
+                        for (int j = 0; j < height; j++)
+                        {
+                            var pixel = (GameOfLifePixel)pixels[i][j];
+                            if (pixel.State != pixel.NextState)
+                            {
+                                pixel.IsDirty = true;
+                                pixel.State = pixel.NextState;
+                            }
+                        }
+                    }
                 }
             }
         }

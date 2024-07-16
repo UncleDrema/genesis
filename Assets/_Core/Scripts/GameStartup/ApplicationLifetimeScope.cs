@@ -1,4 +1,5 @@
-﻿using Geneses.TreeEv;
+﻿using Geneses.GameOfLife;
+using Geneses.TreeEv;
 using Genesis.SceneManagement;
 using UnityEngine;
 using VContainer;
@@ -14,7 +15,7 @@ namespace Genesis.GameStartup
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterSceneManagement(_sceneRepository);
-            builder.RegisterTreeEvGenesis();
+            builder.RegisterGameOfLifeGenesis();
         }
     }
 }

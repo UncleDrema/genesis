@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Geneses.GameOfLife.Components;
-using Genesis.Common.Components;
+﻿using Genesis.Common.Components;
 using Genesis.GameWorld.Events;
 
 namespace Geneses.GameOfLife.Systems
@@ -29,8 +27,6 @@ namespace Geneses.GameOfLife.Systems
             foreach (var world in _initializedWorld)
             {
                 ref var cWorld = ref world.GetComponent<WorldComponent>();
-                ref var cUpdates = ref world.AddComponent<UpdatePixelsComponent>();
-                cUpdates.PixelUpdates = new List<PixelUpdate>(cWorld.Height * cWorld.Width);
             }
         }
     }
