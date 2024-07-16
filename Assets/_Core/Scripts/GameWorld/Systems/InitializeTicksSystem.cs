@@ -15,7 +15,7 @@ namespace Genesis.GameWorld.Systems
         {
             var e = World.CreateEntity();
             ref var cTimer = ref e.AddComponent<TickComponent>();
-            cTimer.Cooldown = 1 / 120f;
+            cTimer.Cooldown = 1 / 300f;
             cTimer.Timer = cTimer.Cooldown;
         }
     }

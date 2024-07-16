@@ -111,7 +111,6 @@ namespace Geneses.TreeEv.Systems
                 if (treePixel.Type != PixelType.Fruit)
                 {
                     treePixel.Type = PixelType.Empty;
-                    treePixel.GeneticCode = null; // TODO: load clear genetic code
                 }
             }
         }

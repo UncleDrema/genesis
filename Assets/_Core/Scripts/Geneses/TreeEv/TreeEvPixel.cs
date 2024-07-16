@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Geneses.TreeEv.Components;
 using Genesis.GameWorld;
 using Scellecs.Morpeh.Collections;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Geneses.TreeEv
 {
@@ -67,13 +69,32 @@ namespace Geneses.TreeEv
 
         private void SpawnFruit(ref TreeComponent cTree)
         {
-            if (cTree.Energy > 1000 && Under.Type is PixelType.Empty)
+            if (cTree.Energy > 500 && Under.Type is PixelType.Empty)
             {
                 Under.Type = PixelType.Fruit;
-                Under.GeneticCode = cTree.Root.GeneticCode;
+                if (Random.value > 0.25f)
+                {
+                    Under.GeneticCode = cTree.Root.GeneticCode;
+                }
+                else
+                {
+                    Under.GeneticCode = Mutated(cTree.Root.GeneticCode);
+                }
                 Under.AddToTree(ref cTree);
-                cTree.Energy -= 500;
+                cTree.Energy -= 150;
             }
+        }
+
+        private Dictionary<int, int[]> Mutated(Dictionary<int, int[]> genes)
+        {
+            var res = new Dictionary<int, int[]>();
+            foreach (var (key, value) in genes)
+            {
+                res[key] = value.ToArray();
+            }
+
+            res[Random.Range(0, 32)][Random.Range(0, 4)] = (int)(Random.value * 64);
+            return res;
         }
 
         public void AddToTree(ref TreeComponent cTree)
@@ -84,7 +105,32 @@ namespace Geneses.TreeEv
 
         public bool IsSiblingOf(TreeEvPixel other)
         {
-            return TreeId != null && other.TreeId != null && TreeId == other.TreeId;
+            if (TreeId is null || other.TreeId is null)
+            {
+                return false;
+            }
+            else if (TreeId == other.TreeId)
+            {
+                return true;
+            }
+
+            var difference = 0;
+            for (int i = 0; i < 32; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (GeneticCode == null)
+                    {
+                        Debug.Log($"My code is null!!! {Type} {X} {Y}");
+                    }
+                    if (other.GeneticCode == null)
+                    {
+                        Debug.Log($"other code is null!!! {other.Type} {other.X} {other.Y}");
+                    }
+                    difference += Math.Abs(GeneticCode[i][j] - other.GeneticCode[i][j]);
+                }
+            }
+            return difference < 7;
         }
     }
 }

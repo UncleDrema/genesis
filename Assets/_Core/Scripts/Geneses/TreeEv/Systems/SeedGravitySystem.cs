@@ -46,26 +46,32 @@ namespace Geneses.TreeEv.Systems
                             {
                                 pixel.Type = PixelType.Seed;
                             }
-                            else if (pixel.Type is PixelType.Seed && pixel.Under.Type is PixelType.Empty)
+                            else if (pixel.Type is PixelType.Seed)
                             {
-                                pixel.Under.GeneticCode = pixel.GeneticCode;
-                                pixel.Under.Type = PixelType.Seed;
-                                pixel.Type = PixelType.Empty;
-                            }
-                            else if (pixel.Type is PixelType.Seed && pixel.Under.Type is PixelType.Seed)
-                            {
-                                pixel.Under.GeneticCode = Mutate(pixel.GeneticCode, pixel.Under.GeneticCode);
-                                pixel.Type = PixelType.Empty;
-                            }
-                            else if (pixel.Type is PixelType.Seed && pixel.Under.Type is not PixelType.Wall)
-                            {
-                                /*
-                                if (!pixel.IsSiblingOf(pixel.Under))
+                                // fall if empty under seed
+                                if (pixel.Under.Type is PixelType.Empty)
                                 {
+                                    pixel.Under.GeneticCode = pixel.GeneticCode;
+                                    pixel.Under.Type = PixelType.Seed;
                                     pixel.Type = PixelType.Empty;
-                                    pixel.GeneticCode = null;
                                 }
-                                */
+                                // merge into under seed if not empty
+                                else if (pixel.Under.Type is PixelType.Seed)
+                                {
+                                    pixel.Under.GeneticCode = Combine(pixel.GeneticCode, pixel.Under.GeneticCode);
+                                    pixel.Type = PixelType.Empty;
+                                }
+                                // if not stopped lie
+                                else if (pixel.Under.Type is not PixelType.Wall)
+                                {
+                                    if (false)
+                                    {
+                                        if (!pixel.IsSiblingOf(pixel.Under))
+                                        {
+                                            pixel.Type = PixelType.Empty;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -73,7 +79,7 @@ namespace Geneses.TreeEv.Systems
             }
         }
 
-        private Dictionary<int, int[]> Mutate(Dictionary<int, int[]> a, Dictionary<int, int[]> b)
+        private Dictionary<int, int[]> Combine(Dictionary<int, int[]> a, Dictionary<int, int[]> b)
         {
             var res = new Dictionary<int, int[]>();
             for (int i = 0; i < 32; i++)
@@ -82,7 +88,7 @@ namespace Geneses.TreeEv.Systems
                 res[i] = arr;
                 for (int j = 0; j < 4; j++)
                 {
-                    if (Random.value < 0.95f)
+                    if (Random.value < 0.995f)
                     {
                         arr[j] = Random.value < 0.5f ? a[i][j] : b[i][j];
                     }
