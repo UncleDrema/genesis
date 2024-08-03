@@ -15,5 +15,6 @@ namespace Genesis.Common.Components
         public int Width;
         public int Height;
         public IPixel[][] Pixels;
+        public int PixelSize;
     }
 }

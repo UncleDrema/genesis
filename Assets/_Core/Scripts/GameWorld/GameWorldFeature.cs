@@ -8,23 +8,28 @@ namespace Genesis.GameWorld
     public class GameWorldFeature : UpdateFeature
     {
         private readonly IGenesis _genesis;
+        private readonly IGameWorldConfig _config;
 
-        public GameWorldFeature(IGenesis genesis)
+        public GameWorldFeature(IGenesis genesis, IGameWorldConfig config)
         {
             _genesis = genesis;
+            _config = config;
         }
         
         protected override void Initialize()
         {
+            RegisterRequest<ClickRequest>();
             RegisterRequest<InitializeGameWorldRequest>();
             
-            AddInitializer(new InitializeTicksSystem());
+            AddInitializer(new InitializeTicksSystem(_config));
             
+            AddSystem(new TransformClickRequestSystem());
             AddSystem(new TickSystem());
-            AddSystem(new InitializeGameWorldSystem(_genesis)); ;
+            AddSystem(new InitializeGameWorldSystem(_genesis, _config));
             
             RegisterEvent<WorldInitializedEvent>();
             RegisterEvent<TickEvent>();
+            RegisterEvent<PixelClickEvent>();
         }
     }
 

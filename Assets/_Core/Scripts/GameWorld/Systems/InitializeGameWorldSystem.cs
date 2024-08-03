@@ -16,13 +16,15 @@ namespace Genesis.GameWorld.Systems
     internal sealed class InitializeGameWorldSystem : UpdateSystem
     {
         private readonly IGenesis _genesis;
+        private readonly IGameWorldConfig _config;
         
         private Filter _gameCanvas;
         private Filter _initGameWorld;
 
-        public InitializeGameWorldSystem(IGenesis genesis)
+        public InitializeGameWorldSystem(IGenesis genesis, IGameWorldConfig config)
         {
             _genesis = genesis;
+            _config = config;
         }
         
         public override void OnAwake()
@@ -31,7 +33,6 @@ namespace Genesis.GameWorld.Systems
                 .With<GameCanvasTag>()
                 .Build();
             _initGameWorld = World.Filter
-                .With<WorldComponent>()
                 .With<InitializeGameWorldRequest>()
                 .Build();
         }
@@ -40,7 +41,10 @@ namespace Genesis.GameWorld.Systems
         {
             foreach (var initWorld in _initGameWorld)
             {
-                ref var cWorld = ref initWorld.GetComponent<WorldComponent>();
+                ref var cWorld = ref initWorld.AddComponent<WorldComponent>();
+                cWorld.Width = _config.WorldWidth;
+                cWorld.Height = _config.WorldHeight;
+                cWorld.PixelSize = _config.PixelSize;
                 var width = cWorld.Width;
                 var height = cWorld.Height;
                 AddInitCanvasRequest(width, height);
