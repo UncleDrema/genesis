@@ -33,7 +33,7 @@ namespace Genesis.GameWorld.Systems
                 {
                     ref var cWorld = ref world.GetComponent<WorldComponent>();
                     pos /= cWorld.PixelSize;
-                    ref var cClickEvent = ref world.AddComponent<PixelClickEvent>();
+                    ref var cClickEvent = ref world.AddComponent<PixelClickedEvent>();
                     var worldX = (int)pos.x;
                     var worldY = (int)pos.y;
                     cClickEvent.Pixel = cWorld.Pixels[worldX][worldY];

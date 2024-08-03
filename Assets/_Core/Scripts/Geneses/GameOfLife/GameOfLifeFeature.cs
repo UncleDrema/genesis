@@ -8,6 +8,7 @@ namespace Geneses.GameOfLife
         protected override void Initialize()
         {
             AddSystem(new InitializeGameOfLifeSystem());
+            AddSystem(new UpdateClickedPixelsSystem());
             AddSystem(new GameOfLifeSystem());
             AddSystem(new UpdatePixelsSystem());
         }

@@ -31,7 +31,7 @@ namespace Genesis.GameWorld
             
             RegisterEvent<WorldInitializedEvent>();
             RegisterEvent<TickEvent>();
-            RegisterEvent<PixelClickEvent>();
+            RegisterEvent<PixelClickedEvent>();
         }
     }
 

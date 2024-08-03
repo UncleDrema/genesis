@@ -9,7 +9,7 @@ namespace Genesis.GameWorld.Events
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     [Serializable]
-    public struct PixelClickEvent : IComponent
+    public struct PixelClickedEvent : IComponent
     {
         public IPixel Pixel;
     }
