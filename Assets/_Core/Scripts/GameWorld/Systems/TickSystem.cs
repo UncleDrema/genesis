@@ -1,5 +1,6 @@
 ﻿using Genesis.Common.Components;
 using Genesis.GameWorld.Events;
+using Genesis.GameWorld.Tags;
 
 namespace Genesis.GameWorld.Systems
 {
@@ -18,6 +19,7 @@ namespace Genesis.GameWorld.Systems
         {
             _ticks = World.Filter
                 .With<TickComponent>()
+                .Without<PausedTag>()
                 .Build();
         }
 

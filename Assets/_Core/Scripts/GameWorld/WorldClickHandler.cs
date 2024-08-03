@@ -1,4 +1,5 @@
-﻿using Genesis.GameWorld.Requests;
+﻿using System;
+using Genesis.GameWorld.Requests;
 using Scellecs.Morpeh;
 using Scellecs.Morpeh.Addons.Feature.Events;
 using Scellecs.Morpeh.Collections;
@@ -10,6 +11,14 @@ namespace Genesis.GameWorld
 {
     public class WorldClickHandler : MonoBehaviour, IPointerClickHandler
     {
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                World.Default.CreateEventEntity<PauseRequest>();
+            }
+        }
+
         public void OnPointerClick(PointerEventData ev)
         {
             var rT = GetComponent<RectTransform>();

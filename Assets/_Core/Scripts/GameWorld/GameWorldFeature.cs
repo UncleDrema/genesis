@@ -18,12 +18,14 @@ namespace Genesis.GameWorld
         
         protected override void Initialize()
         {
+            RegisterRequest<PauseRequest>();
             RegisterRequest<ClickRequest>();
             RegisterRequest<InitializeGameWorldRequest>();
             
             AddInitializer(new InitializeTicksSystem(_config));
             
             AddSystem(new TransformClickRequestSystem());
+            AddSystem(new PauseSystem());
             AddSystem(new TickSystem());
             AddSystem(new InitializeGameWorldSystem(_genesis, _config));
             
