@@ -26,7 +26,7 @@ namespace Genesis.GameWorld
             
             AddSystem(new TransformClickRequestSystem());
             AddSystem(new PauseSystem());
-            AddSystem(new TickSystem());
+            AddSystem(new TickSystem(_config));
             AddSystem(new InitializeGameWorldSystem(_genesis, _config));
             
             RegisterEvent<WorldInitializedEvent>();

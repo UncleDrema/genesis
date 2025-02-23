@@ -11,7 +11,6 @@ namespace Genesis.Common.Components
     [Serializable]
     public struct TickComponent : IComponent
     {
-        public float Cooldown;
         public float Timer;
     }
 }
