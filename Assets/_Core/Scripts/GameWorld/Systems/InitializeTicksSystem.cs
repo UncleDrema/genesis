@@ -11,7 +11,7 @@ namespace Genesis.GameWorld.Systems
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal sealed class InitializeTicksSystem : Initializer
     {
-        private IGameWorldConfig _config;
+        private readonly IGameWorldConfig _config;
 
         public InitializeTicksSystem(IGameWorldConfig config)
         {
@@ -22,8 +22,7 @@ namespace Genesis.GameWorld.Systems
         {
             var e = World.CreateEntity();
             ref var cTimer = ref e.AddComponent<TickComponent>();
-            cTimer.Cooldown = _config.TickPeriod;
-            cTimer.Timer = cTimer.Cooldown;
+            cTimer.Timer = _config.TickPeriod;
         }
     }
 }

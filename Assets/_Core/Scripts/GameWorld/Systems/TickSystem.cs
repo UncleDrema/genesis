@@ -13,7 +13,14 @@ namespace Genesis.GameWorld.Systems
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal sealed class TickSystem : UpdateSystem
     {
+        private readonly IGameWorldConfig _config;
+        
         private Filter _ticks;
+        
+        public TickSystem(IGameWorldConfig config)
+        {
+            _config = config;
+        }
         
         public override void OnAwake()
         {
@@ -32,7 +39,7 @@ namespace Genesis.GameWorld.Systems
                 if (cTick.Timer < 0)
                 {
                     tick.AddComponent<TickEvent>();
-                    cTick.Timer = cTick.Cooldown;
+                    cTick.Timer = _config.TickPeriod;
                 }
             }
         }
