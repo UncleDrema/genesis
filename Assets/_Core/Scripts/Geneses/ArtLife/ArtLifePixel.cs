@@ -34,5 +34,45 @@ namespace Geneses.ArtLife
             Age = 0;
             LastEnergySource = 0;
         }
+                public void Tick()
+        {
+            if (Energy <= 0) return;
+            Age++;
+            ExecuteCommand();
+        }
+
+        private void ExecuteCommand()
+        {
+            int command = Genome[ActiveGeneIndex];
+            switch (command % 12)
+            {
+                case 0: Move(); break;
+                case 1: IncreaseEnergy(); break;
+                case 2: Photosynthesis(); break;
+                case 3: ConvertMinerals(); break;
+                case 4: Eat(); break;
+                case 5: Look(); break;
+                case 6: Turn(); break;
+                case 7: ShareResources(); break;
+                case 8: CheckEnergy(); break;
+                case 9: CheckMinerals(); break;
+                case 10: CheckSurroundings(); break;
+                case 11: CheckOrganic(); break;
+            }
+            ActiveGeneIndex = (ActiveGeneIndex + CommandCounter) % Genome.Length;
+        }
+
+        private void Move() { /* Реализация передвижения */ CommandCounter += 1; }
+        private void IncreaseEnergy() { /* Увеличение энергии */ CommandCounter += 3; }
+        private void Photosynthesis() { /* Фотосинтез */ CommandCounter += 5; }
+        private void ConvertMinerals() { /* Минералы -> энергия */ CommandCounter += 1; }
+        private void Eat() { /* Поглощение органики */ CommandCounter += 4; }
+        private void Look() { /* Осмотр окружающего мира */ CommandCounter += 2; }
+        private void Turn() { /* Поворот */ CommandCounter += 1; }
+        private void ShareResources() { /* Разделение ресурсов */ CommandCounter += 3; }
+        private void CheckEnergy() { /* Проверка энергии */ CommandCounter += 2; }
+        private void CheckMinerals() { /* Проверка минералов */ CommandCounter += 2; }
+        private void CheckSurroundings() { /* Проверка окружения */ CommandCounter += 2; }
+        private void CheckOrganic() { /* Проверка органики */ CommandCounter += 2; }
     }
 }
