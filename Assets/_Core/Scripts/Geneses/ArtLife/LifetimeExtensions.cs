@@ -7,7 +7,8 @@ namespace Geneses.ArtLife
     {
         public static IContainerBuilder RegisterArtLifeGenesis(this IContainerBuilder builder)
         {
-            builder.RegisterInstance(new ArtLifeGenesis()).As<IGenesis>();
+            builder.Register<ArtLifeWorld>(Lifetime.Singleton);
+            builder.Register<ArtLifeGenesis>(Lifetime.Singleton).As<IGenesis>();
             return builder;
         }
     }

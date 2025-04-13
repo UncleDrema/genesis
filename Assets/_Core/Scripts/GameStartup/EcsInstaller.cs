@@ -1,8 +1,5 @@
 ﻿using System;
 using Geneses.ArtLife;
-using Geneses.Blank;
-using Geneses.GameOfLife;
-using Geneses.TreeEv;
 using Genesis.Drawing;
 using Genesis.GameWorld;
 using Scellecs.Morpeh.Addons.Feature;
