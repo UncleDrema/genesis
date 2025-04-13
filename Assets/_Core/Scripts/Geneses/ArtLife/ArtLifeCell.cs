@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Genesis.GameWorld;
 using UnityEngine.Assertions;
+using Random = UnityEngine.Random;
 
 namespace Geneses.ArtLife
 {
@@ -17,6 +19,10 @@ namespace Geneses.ArtLife
         public ArtLifePixel Position { get; set; } // позиция в мире
         public int Energy { get; private set; }
         public int Age { get; private set; }
+        
+        public int TotalPhotosynthesisEnergy { get; private set; } // Всего энергии, полученной от фотосинтеза
+        public int TotalMineralCount { get; private set; } // Всего поглощенных минералов
+        public int TotalOrganicCount { get; private set; } // Всего поглощенной органики
 
         public ArtLifeCell(ArtLifeWorld world, ArtLifePixel position)
         {
@@ -30,7 +36,7 @@ namespace Geneses.ArtLife
             Rotation = 0;
             Position = position;
             position.SetCell(this);
-            Energy = 100;
+            Energy = 50;
             Age = 0;
         }
         
@@ -62,25 +68,33 @@ namespace Geneses.ArtLife
         {
             if (Energy <= 0)
             {
-                Die_NotEnoughEnergy();
+                Die_Naturally();
                 return;
             }
             
-            if (Age >= 100)
+            if (Age >= _world.Config.MaxAge)
             {
-                Die_TooOld();
+                Die_Naturally();
                 return;
             }
 
-            if (Energy > 100)
+            if (Energy > _world.Config.EnergyToDuplicate)
             {
                 Duplicate_EnoughEnergy();
                 return;
             }
+
+            if (Energy > _world.Config.OverloadEnergyCount)
+            {
+                Position.MineralCount = Math.Min(_world.Config.MineralMaxCount,
+                    Position.MineralCount + _world.Config.DeathOrganicSpawnCount);
+                Die_Naturally();
+            }
             
             ExecuteCommand();
             Age++;
-            Energy--;
+            Energy -= _world.Config.EnergySpendPerTick;
+            Position.IsDirty = true;
         }
         
         public void MoveToPosition_IfEmpty(ArtLifePixel newPosition)
@@ -92,12 +106,6 @@ namespace Geneses.ArtLife
                 newPosition.SetCell(this);
             }
         }
-        
-        private void Die_TooOld()
-        {
-            Position.OrganicCount += 10;
-            _world.RemoveCell(this);
-        }
 
         private void Mutate()
         {
@@ -105,18 +113,20 @@ namespace Geneses.ArtLife
             Genome[mutationIndex] = (byte)Random.Range(0, 256);
         }
 
-        private void Die_NotEnoughEnergy()
+        private void Die_Naturally()
         {
-            Position.OrganicCount += 10;
+            Position.OrganicCount = Math.Min(_world.Config.OrganicMaxCount,
+                Position.OrganicCount + _world.Config.DeathOrganicSpawnCount);
             _world.RemoveCell(this);
         }
         
-        private ArtLifePixel FirstEmptyStartingFrom(int direction)
+        private ArtLifePixel FirstEmptySuitableForDuplication(int direction)
         {
             for (int i = 0; i < 8; i++)
             {
                 var neighbor = Position.Neighbors[(direction + i) % 8];
-                if (neighbor.IsEmpty)
+                // Подходят пустые клетки, в которых не слишком много минералов
+                if (neighbor.IsEmpty && neighbor.MineralCount < _world.Config.MineralDuplicationLimit)
                 {
                     return neighbor;
                 }
@@ -127,24 +137,31 @@ namespace Geneses.ArtLife
         
         private void Duplicate_EnoughEnergy()
         {
-            var freePosition = FirstEmptyStartingFrom(Rotation);
+            var freePosition = FirstEmptySuitableForDuplication((Rotation + GeneCounter) % 8);
             if (freePosition != null)
             {
                 var newCell = _world.CreateCell(freePosition);
                 newCell.CopyGenomeFrom(this);
-                if (Random.value < 0.1f)
+                if (Random.value < _world.Config.MutationChance)
                 {
                     newCell.Mutate();
                 }
                 newCell.Rotation = Rotation;
-                newCell.Energy = Energy / 2;
-                Energy = Energy / 2;
+                newCell.Energy = Energy / 3;
+                Energy = Energy / 3;
             }
         }
 
         public Color GetColor()
         {
-            return Color.black;
+            var totalConsumedEnergy = TotalPhotosynthesisEnergy + TotalMineralCount + TotalOrganicCount;
+            
+            var redFactor = Mathf.Clamp01((float)TotalOrganicCount / totalConsumedEnergy);
+            var greenFactor = Mathf.Clamp01((float)TotalPhotosynthesisEnergy / totalConsumedEnergy);
+            var blueFactor = Mathf.Clamp01((float)TotalMineralCount / totalConsumedEnergy);
+            
+            var color = new Color(redFactor, greenFactor, blueFactor);
+            return color;
         }
 
         private void ExecuteCommand()
@@ -174,6 +191,7 @@ namespace Geneses.ArtLife
             if (Position.PhotosynthesisEnergy > 0)
             {
                 Energy += Position.PhotosynthesisEnergy;
+                TotalPhotosynthesisEnergy += Position.PhotosynthesisEnergy;
             }
             GeneCounter += 1;
         }
@@ -191,6 +209,7 @@ namespace Geneses.ArtLife
             if (Position.OrganicCount > 0)
             {
                 Energy += Position.OrganicCount;
+                TotalOrganicCount += Position.OrganicCount;
                 Position.OrganicCount = 0;
             }
             GeneCounter += 1;
@@ -201,6 +220,7 @@ namespace Geneses.ArtLife
             if (Position.MineralCount > 0)
             {
                 Energy += Position.MineralCount;
+                TotalMineralCount += Position.MineralCount;
                 Position.MineralCount = 0;
             }
             GeneCounter += 1;

@@ -7,8 +7,18 @@ namespace Geneses.ArtLife
     public class ArtLifePixel : IPixel
     {
         public bool IsDirty { get; set; }
-        public Color32 Color => Cell?.GetColor() ?? UnityEngine.Color.white;
-        
+        public Color32 Color => Cell?.GetColor() ?? GetNonCellColor();
+
+        private Color GetNonCellColor()
+        {
+            var greenFactor = Mathf.Clamp01(PhotosynthesisEnergy / 10f);
+            var mineralFactor = Mathf.Clamp01(MineralCount / 200f);
+            var redFactor = Mathf.Clamp01(OrganicCount / 100f);
+            
+            var color = new Color(redFactor, greenFactor, mineralFactor);
+            return color;
+        }
+
         public bool IsEmpty => Cell == null;
         
         [CanBeNull]

@@ -17,12 +17,10 @@ namespace Geneses.ArtLife
         {
             var pixel = new ArtLifePixel();
 
-            if (x == width / 2 && y == height / 2)
+            if (x == width / 2 && y == height - height / 3)
             {
                 _world.CreateCell(pixel).FillGenomeWithValue(0);
             }
-
-            pixel.PhotosynthesisEnergy += 3;
             
             return pixel;
         }
