@@ -15,4 +15,4 @@ MonoBehaviour:
   <WorldWidth>k__BackingField: 400
   <WorldHeight>k__BackingField: 300
   <PixelSize>k__BackingField: 2
-  <TickPeriod>k__BackingField: 0.016666668
+  <DesiredFramerate>k__BackingField: 1000
