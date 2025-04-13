@@ -35,6 +35,7 @@ namespace Geneses.ArtLife.Systems
                     ref var cWorld = ref world.GetComponent<WorldComponent>();
                     ref var cArtLifeWorld = ref world.GetComponent<ArtLifeWorldComponent>();
                     
+                    //cArtLifeWorld.ArtLifeWorld.UpdatePixels(ref cWorld);
                     cArtLifeWorld.ArtLifeWorld.Tick();
                 }
             }

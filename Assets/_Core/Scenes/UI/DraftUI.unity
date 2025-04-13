@@ -866,11 +866,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5807607700016289895, guid: 0e60fd3dade7fec4ead947dd76804005, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1418
+      value: 1420
       objectReference: {fileID: 0}
     - target: {fileID: 5807607700016289895, guid: 0e60fd3dade7fec4ead947dd76804005, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 1078
+      value: 1080
       objectReference: {fileID: 0}
     - target: {fileID: 6594352055598997782, guid: 0e60fd3dade7fec4ead947dd76804005, type: 3}
       propertyPath: MainMenuUI
