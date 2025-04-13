@@ -99,6 +99,12 @@ namespace Geneses.ArtLife
             _world.RemoveCell(this);
         }
 
+        private void Mutate()
+        {
+            int mutationIndex = Random.Range(0, Genome.Length);
+            Genome[mutationIndex] = (byte)Random.Range(0, 256);
+        }
+
         private void Die_NotEnoughEnergy()
         {
             Position.OrganicCount += 10;
@@ -126,6 +132,10 @@ namespace Geneses.ArtLife
             {
                 var newCell = _world.CreateCell(freePosition);
                 newCell.CopyGenomeFrom(this);
+                if (Random.value < 0.1f)
+                {
+                    newCell.Mutate();
+                }
                 newCell.Rotation = Rotation;
                 newCell.Energy = Energy / 2;
                 Energy = Energy / 2;
