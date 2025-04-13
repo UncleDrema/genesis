@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: SceneRepository
   m_EditorClassIdentifier: 
   <BootScenePath>k__BackingField: Assets/_Core/Scenes/Boot.unity
-  <GameScenePath>k__BackingField: Assets/_Core/Scenes/Game.unity
+  <GameScenePath>k__BackingField: Assets/_Core/Scenes/UI/DraftUI.unity

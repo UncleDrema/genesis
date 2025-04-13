@@ -23,6 +23,7 @@ namespace Geneses.ArtLife.Systems
             {
                 ref var cPixelClicked = ref ev.GetComponent<PixelClickedEvent>();
                 var pixel = (ArtLifePixel)cPixelClicked.Pixel;
+                
             }
         }
     }

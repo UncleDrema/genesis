@@ -4,18 +4,36 @@ namespace Geneses.ArtLife
 {
     public class ArtLifeWorld
     {
-        private List<ArtLifePixel> _pixels = new List<ArtLifePixel>();
+        private readonly CellList _cellList = new();
 
-        public void AddPixel(ArtLifePixel pixel)
+        public ArtLifeCell CreateCell(ArtLifePixel pixel)
         {
-            _pixels.Add(pixel);
+            var cell = new ArtLifeCell(this, pixel);
+            _cellList.Add(cell);
+            pixel.SetCell(cell);
+            return cell;
+        }
+        
+        public void RemoveCell(ArtLifeCell cell)
+        {
+            var node = cell.Node;
+            _cellList.Remove(node);
+            cell.Position.MakeEmpty();
+            cell.Node = null;
+            cell.Position = null;
         }
 
         public void Tick()
         {
-            foreach (var pixel in _pixels)
+            var zero = _cellList.Zero;
+            var current = zero.Next;
+            while (current != zero)
             {
-                pixel.Tick();
+                var cell = current.Cell;
+                var next = current.Next;
+                // Клетка может удалить себя из списка
+                cell.Tick();
+                current = next;
             }
         }
     }

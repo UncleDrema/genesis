@@ -1,4 +1,5 @@
-﻿using Genesis.Common.Components;
+﻿using Geneses.ArtLife.Components;
+using Genesis.Common.Components;
 using Genesis.GameWorld.Events;
 using Scellecs.Morpeh;
 using Scellecs.Morpeh.Addons.Systems;
@@ -21,6 +22,7 @@ namespace Geneses.ArtLife.Systems
                 .Build();
             _world = World.Filter
                 .With<WorldComponent>()
+                .With<ArtLifeWorldComponent>()
                 .Build();
         }
 
@@ -31,16 +33,11 @@ namespace Geneses.ArtLife.Systems
                 foreach (var world in _world)
                 {
                     ref var cWorld = ref world.GetComponent<WorldComponent>();
-                    UpdateWorld(ref cWorld);
+                    ref var cArtLifeWorld = ref world.GetComponent<ArtLifeWorldComponent>();
+                    
+                    cArtLifeWorld.ArtLifeWorld.Tick();
                 }
             }
-        }
-
-        private void UpdateWorld(ref WorldComponent cWorld)
-        {
-            var pixels = cWorld.Pixels;
-            var width = cWorld.Width;
-            var height = cWorld.Height;
         }
     }
 }
