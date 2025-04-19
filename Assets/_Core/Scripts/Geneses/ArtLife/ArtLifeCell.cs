@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
-using Genesis.GameWorld;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
 
@@ -21,9 +19,11 @@ namespace Geneses.ArtLife
         public int Age { get; private set; }
         
         public int TotalPhotosynthesisEnergy { get; private set; } // Всего энергии, полученной от фотосинтеза
-        public int TotalMineralCount { get; private set; } // Всего поглощенных минералов
-        public int TotalOrganicCount { get; private set; } // Всего поглощенной органики
-        public int AccumulatedMineralsCount { get; private set; }
+        public int TotalMineralEnergy { get; private set; } // Всего энергии, полученной от минералов
+        public int TotalOrganicEnergy { get; private set; } // Всего энергии, полученной от органики
+        public int AccumulatedMineralsCount { get; private set; } // Количество накопленных минералов
+        public int ExecutedCommandsInCycle { get; private set; } // Количество выполненных команд в текущем цикле
+        public bool BreakExecution { get; private set; } // Признак того, что клетка должна прервать выполнение команд в текущем цикле
 
         public ArtLifeCell(ArtLifeWorld world, ArtLifePixel position)
         {
@@ -67,45 +67,51 @@ namespace Geneses.ArtLife
         
         public void Tick()
         {
+            Position.IsDirty = true;
+            Energy -= _world.Config.EnergySpendPerTick;
+            
             if (Energy <= 0)
             {
-                Die_Naturally();
+                Die_Organic();
                 return;
             }
             
+            /*
             if (Age >= _world.Config.MaxAge)
             {
-                Die_Naturally();
+                Die_Organic();
                 return;
-            }
-
-            if (Energy > _world.Config.EnergyToDuplicate)
-            {
-                Duplicate_EnoughEnergy();
-                return;
-            }
-
-            /*
-            if (Energy > _world.Config.OverloadEnergyCount)
-            {
-                Position.MineralCount = Math.Min(_world.Config.MineralMaxCount,
-                    Position.MineralCount + _world.Config.DeathOrganicSpawnCount);
-                Die_Naturally();
             }
             */
-
-            AccumulateMinerals();
             
-            ExecuteCommand();
+            AccumulateMinerals();
+
+            ExecutedCommandsInCycle = 0;
+            BreakExecution = false;
+
+            while (ExecutedCommandsInCycle < 15 && !BreakExecution)
+            {
+                ExecuteCommand();
+                ExecutedCommandsInCycle++;
+            }
+            
+            if (Energy > _world.Config.MaxEnergy)
+            {
+                Energy = _world.Config.MaxEnergy;
+            }
+
+            if (Energy == _world.Config.MaxEnergy)
+            {
+                Duplicate_MaxEnergy();
+            }
+            
             Age++;
-            Energy -= _world.Config.EnergySpendPerTick;
-            Position.IsDirty = true;
         }
 
         private void AccumulateMinerals()
         {
             AccumulatedMineralsCount += Position.MineralCount;
-            AccumulatedMineralsCount = Math.Min(AccumulatedMineralsCount, _world.Config.MineralMaxCount);
+            AccumulatedMineralsCount = Math.Min(AccumulatedMineralsCount, _world.Config.MaxAccumulatedMinerals);
         }
 
         public void MoveToPosition_IfEmpty(ArtLifePixel newPosition)
@@ -124,10 +130,15 @@ namespace Geneses.ArtLife
             Genome[mutationIndex] = (byte)Random.Range(0, 256);
         }
 
-        private void Die_Naturally()
+        private void Die_Organic()
         {
-            Position.OrganicCount = Math.Min(_world.Config.OrganicMaxCount,
-                Position.OrganicCount + _world.Config.DeathOrganicSpawnCount);
+            var position = Position;
+            _world.RemoveCell(this);
+            position.MakeOrganic();
+        }
+        
+        private void Die_NoOrganic()
+        {
             _world.RemoveCell(this);
         }
         
@@ -176,11 +187,15 @@ namespace Geneses.ArtLife
             
             return bestPixel;
         }
-        
-        private void Duplicate_EnoughEnergy()
+
+        private void Duplicate_MaxEnergy()
         {
-            var freePosition = FindFirstNeighbour((Rotation + GeneCounter) % 8,
-                p => p.IsEmpty && p.OrganicCount < _world.Config.OrganicMaxCount);
+            Duplicate_Impl();
+        }
+        
+        private void Duplicate_Impl()
+        {
+            var freePosition = FindFirstNeighbour((Rotation + Age) % 8, p => p.IsEmpty);
 
             if (freePosition != null)
             {
@@ -190,28 +205,46 @@ namespace Geneses.ArtLife
                 {
                     newCell.Mutate();
                 }
-                newCell.Rotation = Rotation;
-                newCell.Energy = Energy / 3;
-                Energy = Energy / 3;
+                newCell.Rotation = Random.Range(0, 8);
+                newCell.Energy = Energy / 2;
+                Energy = Energy / 2;
                 newCell.AccumulatedMineralsCount = AccumulatedMineralsCount / 2;
                 AccumulatedMineralsCount = AccumulatedMineralsCount / 2;
             }
             else
             {
-                Die_Naturally();
+                Die_Organic();
             }
         }
 
         public Color GetColor()
         {
-            var totalConsumedEnergy = TotalPhotosynthesisEnergy + TotalMineralCount + TotalOrganicCount;
+            var totalConsumedEnergy = TotalPhotosynthesisEnergy + TotalMineralEnergy + TotalOrganicEnergy;
             
-            var redFactor = Mathf.Clamp01((float)TotalOrganicCount / totalConsumedEnergy);
+            var redFactor = Mathf.Clamp01((float)TotalOrganicEnergy / totalConsumedEnergy);
             var greenFactor = Mathf.Clamp01((float)TotalPhotosynthesisEnergy / totalConsumedEnergy);
-            var blueFactor = Mathf.Clamp01((float)TotalMineralCount / totalConsumedEnergy);
+            var blueFactor = Mathf.Clamp01((float)TotalMineralEnergy / totalConsumedEnergy);
             
             var color = new Color(redFactor, greenFactor, blueFactor);
             return color;
+        }
+
+        private void GainPhotosynthesisEnergy(int energy)
+        {
+            TotalPhotosynthesisEnergy += energy;
+            Energy += energy;
+        }
+        
+        private void GainMineralEnergy(int energy)
+        {
+            TotalMineralEnergy += energy;
+            Energy += energy;
+        }
+        
+        private void GainOrganicEnergy(int energy)
+        {
+            TotalOrganicEnergy += energy;
+            Energy += energy;
         }
 
         private void ExecuteCommand()
@@ -219,16 +252,69 @@ namespace Geneses.ArtLife
             int command = Genome[GeneCounter];
             switch (command)
             {
-                case 0: Photosynthesis(); break;
-                case 1: Move(); break;
-                case 2: ConsumeOrganics(); break;
-                case 3: ConvertMineralsToEnergy(); break;
-                case 4: Rotate(); break;
+                case 0: Photosynthesis(); StopExecuting(); break;
+                case 1: Rotate(absolute: true); break;
+                case 2: Rotate(absolute: false); break;
+                case 3: Move(absolute: true); StopExecuting(); break;
+                case 4: Move(absolute: false); StopExecuting(); break;
+                case 5: Look(absolute: true); break;
+                case 6: Look(absolute: false); break;
+                case 7: AlignHorizontal(); break;
+                case 8: AlignVertical(); break;
+                case 9: Share(absolute: true); break;
+                case 10: Share(absolute: false); break;
+                case 11: Gift(absolute: true); break;
+                case 12: Gift(absolute: false); break;
+                case 13: Eat(absolute: true); StopExecuting(); break;
+                case 14: Eat(absolute: false); StopExecuting(); break;
+                case 15: ConvertMinerals(); StopExecuting(); break;
+                case 16: Duplicate(); StopExecuting(); break;
+                case 17: CheckHeight(); break;
+                case 18: CheckPhotosynthesis(); break;
+                case 19: CheckMinerals(); break;
+                case 20: CheckSurrounded(); break;
+                case 21: CheckEnergyFlow(); break;
+                case 22: CheckMineralFlow(); break;
+                
                 default:
                     GeneCounter += command;
                     break;
             }
             GeneCounter = GeneCounter % Genome.Length;
+        }
+
+        private void StopExecuting()
+        {
+            BreakExecution = true;
+        }
+        
+        private int GetDirection(bool absolute)
+        {
+            if (absolute)
+            {
+                return GetGeneArgument(1) % 8;
+            }
+            else
+            {
+                return (Rotation + GetGeneArgument(1)) % 8;
+            }
+        }
+
+        private int GetArgumentNoFromPosition(ArtLifePixel pixel)
+        {
+            switch (pixel.Content)
+            {
+                case PixelContentType.Empty:
+                    return 2;
+                case PixelContentType.Wall:
+                    return 3;
+                case PixelContentType.Organic:
+                    return 4;
+                case PixelContentType.Cell:
+                    return 5;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private byte GetGeneArgument(int index)
@@ -240,58 +326,152 @@ namespace Geneses.ArtLife
         {
             if (Position.PhotosynthesisEnergy > 0)
             {
-                var mineralsMult = 1 + _world.Config.MineralsPhotosynthesisMultiplier * AccumulatedMineralsCount / _world.Config.MineralMaxCount;
+                var mineralsMult = 1 + _world.Config.MineralsPhotosynthesisMultiplier * AccumulatedMineralsCount / _world.Config.MaxAccumulatedMinerals;
                 var photosynthesisEnergy = Mathf.RoundToInt(Position.PhotosynthesisEnergy * mineralsMult);
-                Energy += photosynthesisEnergy;
-                TotalPhotosynthesisEnergy += photosynthesisEnergy;
+                GainPhotosynthesisEnergy(photosynthesisEnergy);
             }
             GeneCounter += 1;
         }
         
-        private void Move()
+        private void Rotate(bool absolute)
         {
-            var searchDirection = (Rotation + GetGeneArgument(1)) % 8;
-            var newPosition = Position.Neighbors[searchDirection];
-            MoveToPosition_IfEmpty(newPosition);
+            Rotation = GetDirection(absolute);
             GeneCounter += 2;
         }
-        
-        private void ConsumeOrganics()
+
+        private void Move(bool absolute)
         {
-            // Ищем пустую клетку с самым большим количеством органики рядом
-            var bestPosition = FindBestNeighbour((Rotation + GeneCounter) % 8,
-                p => p.IsEmpty && p.OrganicCount > 0,
-                p => p.OrganicCount,
-                includeSelf: true);
-            
-            if (bestPosition != null)
-            {
-                // Потребляем органику
-                var consumedOrganics = bestPosition.OrganicCount;
-                bestPosition.OrganicCount = 0;
-                Energy += consumedOrganics;
-                TotalOrganicCount += consumedOrganics;
-            }
-            
+            var direction = GetDirection(absolute);
+            var positionToMove = Position.Neighbors[direction];
+            MoveToPosition_IfEmpty(positionToMove);
+            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(positionToMove));
+        }
+
+        private void Look(bool absolute)
+        {
+            var direction = GetDirection(absolute);
+            var positionToLook = Position.Neighbors[direction];
+            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(positionToLook));
+        }
+
+        private void AlignHorizontal()
+        {
             GeneCounter += 1;
         }
         
-        private void ConvertMineralsToEnergy()
+        private void AlignVertical()
         {
-            if (Position.MineralCount > 0)
+            GeneCounter += 1;
+        }
+
+        private void Share(bool absolute)
+        {
+            var direction = GetDirection(absolute);
+            GeneCounter += 2;
+        }
+
+        private void Gift(bool absolute)
+        {
+            var direction = GetDirection(absolute);
+            GeneCounter += 2;
+        }
+
+        private void Eat(bool absolute)
+        {
+            var direction = GetDirection(absolute);
+            var positionToEat = Position.Neighbors[direction];
+            
+            // Съедаем органику
+            if (positionToEat.Content is PixelContentType.Organic)
             {
-                Energy += AccumulatedMineralsCount;
-                TotalMineralCount += AccumulatedMineralsCount;
+                Energy += 100;
+                positionToEat.MakeEmpty();
+            }
+            // Нападаем на клетку
+            else if (positionToEat.Content is PixelContentType.Cell)
+            {
+                var other = positionToEat.Cell!;
+                if (AccumulatedMineralsCount > other.AccumulatedMineralsCount)
+                {
+                    AccumulatedMineralsCount -= other.AccumulatedMineralsCount;
+                    var gainedEnergy = 100 + other.Energy / 2;
+                    GainOrganicEnergy(gainedEnergy);
+                    other.Die_NoOrganic();
+                }
+                else
+                {
+                    other.AccumulatedMineralsCount -= AccumulatedMineralsCount;
+                    AccumulatedMineralsCount = 0;
+                    // Если здоровья в 2 раза больше, чем у жертвы, пробиваем защиту
+                    if (Energy >= other.AccumulatedMineralsCount * 2)
+                    {
+                        var gainedEnergy = 100 + other.Energy / 2 - other.AccumulatedMineralsCount * 2;
+                        GainOrganicEnergy(gainedEnergy);
+                        other.Die_NoOrganic();
+                    }
+                    else
+                    {
+                        // Не хватило сил
+                        Die_Organic();
+                    }
+                }
+            }
+
+            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(positionToEat));
+        }
+
+
+        private void ConvertMinerals()
+        {
+            // Можно преобразовать до 20 минералов за раз
+            if (AccumulatedMineralsCount > 20)
+            {
+                Energy += 20 * _world.Config.MineralsToEnergy;
+                AccumulatedMineralsCount -= 20;
+            }
+            else
+            {
+                Energy += AccumulatedMineralsCount * _world.Config.MineralsToEnergy;
                 AccumulatedMineralsCount = 0;
             }
+            
+            GeneCounter += 1;
+        }
+
+        private void Duplicate()
+        {
+            Duplicate_Impl();
+            GeneCounter += 1;
+        }
+
+        private void CheckHeight()
+        {
+            GeneCounter += 1;
+        }
+
+        private void CheckPhotosynthesis()
+        {
             GeneCounter += 1;
         }
         
-        private void Rotate()
+        private void CheckMinerals()
         {
-            var newRotation = GetGeneArgument(1) % 8;
-            Rotation = newRotation;
-            GeneCounter += 2;
+            GeneCounter += 1;
+        }
+
+        private void CheckSurrounded()
+        {
+            GeneCounter += 1;
+        }
+
+        private void CheckEnergyFlow()
+        {
+            GeneCounter += 1;
+        }
+
+        private void CheckMineralFlow()
+        {
+            GeneCounter += 1;
         }
     }
 }

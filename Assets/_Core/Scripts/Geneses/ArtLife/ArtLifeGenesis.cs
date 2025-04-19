@@ -27,8 +27,8 @@ namespace Geneses.ArtLife
 
         private static readonly Vector2Int[] Directions =
         {
-            new Vector2Int(1, 0), new Vector2Int(1, 1), new Vector2Int(0, 1), new Vector2Int(-1, 1),
-            new Vector2Int(-1, 0), new Vector2Int(-1, -1), new Vector2Int(0, -1), new Vector2Int(1, -1)
+            new(1, 0), new(1, 1), new(0, 1), new(-1, 1),
+            new(-1, 0), new(-1, -1), new(0, -1), new(1, -1)
         };
         
         public void PostProcess(ref WorldComponent cWorld)
