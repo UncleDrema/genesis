@@ -1,4 +1,5 @@
 ﻿using Geneses.ArtLife.Components;
+using Geneses.ArtLife.ConstructingLife;
 using Genesis.Common.Components;
 using Genesis.GameWorld.Events;
 using Scellecs.Morpeh;
@@ -40,7 +41,7 @@ namespace Geneses.ArtLife.Systems
 
                     // Создаем клетку и заполняем ее геномом
                     var cell = cArtLifeWorld.ArtLifeWorld.CreateCell(pixel);
-                    cell.FillGenomeWithValue(0);
+                    cell.FillFromSource(LifePresets.SimpleLife(), 255);
                 }
             }
         }

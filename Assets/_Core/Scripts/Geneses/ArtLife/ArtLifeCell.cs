@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using Geneses.ArtLife.ConstructingLife;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
@@ -39,6 +41,18 @@ namespace Geneses.ArtLife
             position.SetCell(this);
             Energy = 50;
             Age = 0;
+        }
+
+        public void FillFromSource(byte[] source, byte remaining)
+        {
+            for (int i = 0; i < source.Length; i++)
+            {
+                Genome[i] = source[i];
+            }
+            for (int i = source.Length; i < Genome.Length; i++)
+            {
+                Genome[i] = remaining;
+            }
         }
         
         public void FillGenomeWithRandomValues()
@@ -249,7 +263,14 @@ namespace Geneses.ArtLife
 
         private void ExecuteCommand()
         {
-            int command = Genome[GeneCounter];
+            byte command = Genome[GeneCounter];
+            /*
+            Debug.Log($"Pointer at genome value: {command}");
+            if (Enum.GetValues(typeof(LifeBuilder.ArtLifeGenome)).Cast<LifeBuilder.ArtLifeGenome>().Any(g => (byte)g == command))
+            {
+                Debug.Log($"\tCommand: {(LifeBuilder.ArtLifeGenome)command}");
+            }
+            */
             switch (command)
             {
                 case 0: Photosynthesis(); StopExecuting(); break;
@@ -269,18 +290,20 @@ namespace Geneses.ArtLife
                 case 14: Eat(absolute: false); StopExecuting(); break;
                 case 15: ConvertMinerals(); StopExecuting(); break;
                 case 16: Duplicate(); StopExecuting(); break;
-                case 17: CheckHeight(); break;
-                case 18: CheckPhotosynthesis(); break;
+                case 17: CheckEnergy(); break;
+                case 18: CheckHeight(); break;
                 case 19: CheckMinerals(); break;
                 case 20: CheckSurrounded(); break;
-                case 21: CheckEnergyFlow(); break;
+                case 21: CheckPhotosynthesisFlow(); break;
                 case 22: CheckMineralFlow(); break;
+                case 255: GeneCounter = 0; break;
                 
                 default:
                     GeneCounter += command;
                     break;
             }
-            GeneCounter = GeneCounter % Genome.Length;
+
+            GeneCounter %= Genome.Length;
         }
 
         private void StopExecuting()
@@ -356,24 +379,82 @@ namespace Geneses.ArtLife
 
         private void AlignHorizontal()
         {
+            if (Random.value > 0.5f)
+            {
+                Rotation = (byte) LifeBuilder.Direction.Right;
+            }
+            else
+            {
+                Rotation = (byte) LifeBuilder.Direction.Left;
+            }
             GeneCounter += 1;
         }
         
         private void AlignVertical()
         {
+            if (Random.value > 0.5f)
+            {
+                Rotation = (byte) LifeBuilder.Direction.Up;
+            }
+            else
+            {
+                Rotation = (byte) LifeBuilder.Direction.Down;
+            }
             GeneCounter += 1;
         }
 
         private void Share(bool absolute)
         {
             var direction = GetDirection(absolute);
-            GeneCounter += 2;
+            var position = Position.Neighbors[direction];
+            if (position.Content is PixelContentType.Cell)
+            {
+                var other = position.Cell!;
+                var totalEnergy = Energy + other.Energy;
+                if (totalEnergy > 1)
+                {
+                    other.Energy = totalEnergy / 2;
+                    Energy = totalEnergy / 2;
+                }
+
+                var totalMinerals = AccumulatedMineralsCount + other.AccumulatedMineralsCount;
+                if (totalMinerals > 1)
+                {
+                    other.AccumulatedMineralsCount = totalMinerals / 2;
+                    AccumulatedMineralsCount = totalMinerals / 2;
+                }
+            }
+            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(position));
         }
 
         private void Gift(bool absolute)
         {
             var direction = GetDirection(absolute);
-            GeneCounter += 2;
+            var position = Position.Neighbors[direction];
+            if (position.Content is PixelContentType.Cell)
+            {
+                var other = position.Cell!;
+                if (other.Energy < Energy)
+                {
+                    var difference = Energy - other.Energy;
+                    if (difference > 1)
+                    {
+                        other.Energy += difference / 2;
+                        Energy -= difference / 2;
+                    }
+                }
+                
+                if (other.AccumulatedMineralsCount < AccumulatedMineralsCount)
+                {
+                    var difference = AccumulatedMineralsCount - other.AccumulatedMineralsCount;
+                    if (difference > 1)
+                    {
+                        other.AccumulatedMineralsCount += difference / 2;
+                        AccumulatedMineralsCount -= difference / 2;
+                    }
+                }
+            }
+            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(position));
         }
 
         private void Eat(bool absolute)
@@ -384,7 +465,7 @@ namespace Geneses.ArtLife
             // Съедаем органику
             if (positionToEat.Content is PixelContentType.Organic)
             {
-                Energy += 100;
+                Energy += _world.Config.EnergyFromOrganic;
                 positionToEat.MakeEmpty();
             }
             // Нападаем на клетку
@@ -394,7 +475,7 @@ namespace Geneses.ArtLife
                 if (AccumulatedMineralsCount > other.AccumulatedMineralsCount)
                 {
                     AccumulatedMineralsCount -= other.AccumulatedMineralsCount;
-                    var gainedEnergy = 100 + other.Energy / 2;
+                    var gainedEnergy = _world.Config.EnergyFromOrganic + other.Energy / 2;
                     GainOrganicEnergy(gainedEnergy);
                     other.Die_NoOrganic();
                 }
@@ -405,7 +486,7 @@ namespace Geneses.ArtLife
                     // Если здоровья в 2 раза больше, чем у жертвы, пробиваем защиту
                     if (Energy >= other.AccumulatedMineralsCount * 2)
                     {
-                        var gainedEnergy = 100 + other.Energy / 2 - other.AccumulatedMineralsCount * 2;
+                        var gainedEnergy = _world.Config.EnergyFromOrganic + other.Energy / 2 - other.AccumulatedMineralsCount * 2;
                         GainOrganicEnergy(gainedEnergy);
                         other.Die_NoOrganic();
                     }
@@ -423,17 +504,11 @@ namespace Geneses.ArtLife
 
         private void ConvertMinerals()
         {
-            // Можно преобразовать до 20 минералов за раз
-            if (AccumulatedMineralsCount > 20)
-            {
-                Energy += 20 * _world.Config.MineralsToEnergy;
-                AccumulatedMineralsCount -= 20;
-            }
-            else
-            {
-                Energy += AccumulatedMineralsCount * _world.Config.MineralsToEnergy;
-                AccumulatedMineralsCount = 0;
-            }
+            var mineralsToConvert = Math.Min(AccumulatedMineralsCount, _world.Config.MaxMineralsToConvert);
+            
+            var energyFromMinerals = mineralsToConvert * _world.Config.MineralsToEnergy;
+            GainMineralEnergy(energyFromMinerals);
+            AccumulatedMineralsCount -= mineralsToConvert;
             
             GeneCounter += 1;
         }
@@ -441,37 +516,100 @@ namespace Geneses.ArtLife
         private void Duplicate()
         {
             Duplicate_Impl();
+            
             GeneCounter += 1;
+        }
+
+        private void CheckEnergy()
+        {
+            var energyLevel = (float) Energy / _world.Config.MaxEnergy;
+            var requiredEnergyLevel = GetGeneArgument(1) / 255f;
+            if (energyLevel >= requiredEnergyLevel)
+            {
+                GeneCounter += GetGeneArgument(2);
+            }
+            else
+            {
+                GeneCounter += GetGeneArgument(3);
+            }
         }
 
         private void CheckHeight()
         {
-            GeneCounter += 1;
+            var heightLevel = (float) Position.Y / _world.Height;
+            var requiredHeightLevel = GetGeneArgument(1) / 255f;
+            if (heightLevel >= requiredHeightLevel)
+            {
+                GeneCounter += GetGeneArgument(2);
+            }
+            else
+            {
+                GeneCounter += GetGeneArgument(3);
+            }
         }
 
-        private void CheckPhotosynthesis()
-        {
-            GeneCounter += 1;
-        }
-        
         private void CheckMinerals()
         {
-            GeneCounter += 1;
+            var mineralsLevel = (float) AccumulatedMineralsCount / _world.Config.MaxAccumulatedMinerals;
+            var requiredMineralsLevel = GetGeneArgument(1) / 255f;
+            if (mineralsLevel >= requiredMineralsLevel)
+            {
+                GeneCounter += GetGeneArgument(2);
+            }
+            else
+            {
+                GeneCounter += GetGeneArgument(3);
+            }
         }
 
         private void CheckSurrounded()
         {
-            GeneCounter += 1;
+            var surrounded = true;
+            for (int i = 0; i < 8; i++)
+            {
+                if (Position.Neighbors[i].IsEmpty)
+                {
+                    surrounded = false;
+                    break;
+                }
+            }
+
+            if (surrounded)
+            {
+                GeneCounter += GetGeneArgument(1);
+            }
+            else
+            {
+                GeneCounter += GetGeneArgument(2);
+            }
         }
 
-        private void CheckEnergyFlow()
+        private void CheckPhotosynthesisFlow()
         {
-            GeneCounter += 1;
+            var photosynthesisLevel = (float) Position.PhotosynthesisEnergy / _world.Config.PhotosynthesisEnergyMax;
+            var requiredPhotosynthesisLevel = GetGeneArgument(1) / 255f;
+            if (photosynthesisLevel >= requiredPhotosynthesisLevel)
+            {
+                GeneCounter += GetGeneArgument(2);
+            }
+            else
+            {
+                GeneCounter += GetGeneArgument(3);
+            }
         }
 
         private void CheckMineralFlow()
         {
-            GeneCounter += 1;
+            var mineralsLevel = (float) Position.MineralCount / _world.Config.MineralsPerLayer * _world.Config.MineralsLevel;
+            var requiredMineralsLevel = GetGeneArgument(1) / 255f;
+            if (mineralsLevel >= requiredMineralsLevel)
+            {
+                GeneCounter += GetGeneArgument(2);
+            }
+            else
+            {
+                GeneCounter += GetGeneArgument(3);
+            }
         }
     }
 }
