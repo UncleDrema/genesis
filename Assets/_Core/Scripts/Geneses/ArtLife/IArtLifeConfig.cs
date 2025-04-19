@@ -14,5 +14,7 @@
         int MineralsToEnergy { get; }
         float MineralsPhotosynthesisMultiplier { get; }
         int EnergySpendPerTick { get; }
+        int EnergyFromOrganic { get; }
+        int MaxMineralsToConvert { get; }
     }
 }

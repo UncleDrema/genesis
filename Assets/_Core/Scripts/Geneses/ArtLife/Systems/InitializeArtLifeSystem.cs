@@ -37,7 +37,7 @@ namespace Geneses.ArtLife.Systems
                 // TODO: Инициализировать мир
                 ref var cArtLifeWorld = ref world.AddComponent<ArtLifeWorldComponent>();
                 cArtLifeWorld.ArtLifeWorld = _artLifeWorld;
-                _artLifeWorld.UpdatePixels(ref cWorld);
+                _artLifeWorld.InitWorld(ref cWorld);
             }
         }
     }

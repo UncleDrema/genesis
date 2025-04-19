@@ -8,6 +8,10 @@ namespace Geneses.ArtLife
     public class ArtLifePixel : IPixel
     {
         public bool IsDirty { get; set; }
+        
+        public int X { get; set; }
+        
+        public int Y { get; set; }
 
         public Color32 Color
         {

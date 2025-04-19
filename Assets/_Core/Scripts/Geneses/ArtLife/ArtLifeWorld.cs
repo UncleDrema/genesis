@@ -10,6 +10,9 @@ namespace Geneses.ArtLife
         private readonly IArtLifeConfig _config;
         public IArtLifeConfig Config => _config;
         
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        
         public ArtLifeWorld(IArtLifeConfig config)
         {
             _config = config;
@@ -56,10 +59,12 @@ namespace Geneses.ArtLife
             }
         }
 
-        public void UpdatePixels(ref WorldComponent cWorld)
+        public void InitWorld(ref WorldComponent cWorld)
         {
             var width = cWorld.Width;
             var height = cWorld.Height;
+            Width = width;
+            Height = height;
             
             var photosynthesisLevel = _config.PhotosynthesisLevel;
             var photosynthesisEnergyMax = _config.PhotosynthesisEnergyMax;

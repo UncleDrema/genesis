@@ -1,4 +1,5 @@
-﻿using Genesis.Common.Components;
+﻿using Geneses.ArtLife.ConstructingLife;
+using Genesis.Common.Components;
 using Genesis.GameWorld;
 using UnityEngine;
 
@@ -19,7 +20,7 @@ namespace Geneses.ArtLife
 
             if (x == width / 2 && y == height - height / 3)
             {
-                _world.CreateCell(pixel).FillGenomeWithValue(0);
+                //_world.CreateCell(pixel).FillFromSource(LifePresets.SimpleLife(), 255);
             }
             
             return pixel;
@@ -39,6 +40,8 @@ namespace Geneses.ArtLife
                 for (int y = 0; y < cWorld.Height; y++)
                 {
                     var pixel = (ArtLifePixel)cWorld.Pixels[x][y];
+                    pixel.X = x;
+                    pixel.Y = y;
 
                     for (int i = 0; i < 8; i++)
                     {
