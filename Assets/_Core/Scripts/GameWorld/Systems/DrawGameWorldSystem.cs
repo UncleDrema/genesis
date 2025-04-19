@@ -13,8 +13,15 @@ namespace Genesis.GameWorld.Systems
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal sealed class DrawGameWorldSystem : LateUpdateSystem
     {
+        private readonly IGameWorldConfig _config;
+        
         private Filter _gameCanvas;
         private Filter _gameWorld;
+        
+        public DrawGameWorldSystem(IGameWorldConfig config)
+        {
+            _config = config;
+        }
         
         public override void OnAwake()
         {
@@ -33,6 +40,12 @@ namespace Genesis.GameWorld.Systems
                 foreach (var gameWorld in _gameWorld)
                 {
                     ref var cGameWorld = ref gameWorld.GetComponent<WorldComponent>();
+                    if (cGameWorld.DrawSkipFrames > 0)
+                    {
+                        cGameWorld.DrawSkipFrames--;
+                        continue;
+                    }
+                    
                     for (int i = 0; i < cGameWorld.Width; i++)
                     {
                         for (int j = 0; j < cGameWorld.Height; j++)
@@ -45,6 +58,8 @@ namespace Genesis.GameWorld.Systems
                             }
                         }
                     }
+                    
+                    cGameWorld.DrawSkipFrames = _config.DrawEveryNthFrame;
                 }
             }
         }

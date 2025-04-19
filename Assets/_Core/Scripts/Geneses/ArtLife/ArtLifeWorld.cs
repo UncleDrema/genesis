@@ -60,7 +60,6 @@ namespace Geneses.ArtLife
             var mineralsLevel = _config.MineralsLevel;
             var mineralsPerLayer = _config.MineralsPerLayer;
             var mineralLayersCount = _config.MineralLayersCount;
-            var maxMinerals = _config.MineralMaxCount;
             
             var maxMineralsHeight = height * mineralsLevel;
             var layerWidth = maxMineralsHeight / mineralLayersCount;
@@ -86,9 +85,11 @@ namespace Geneses.ArtLife
                     {
                         var mineralNumber = (int)((maxMineralsHeight - y) / layerWidth) + 1;
                         var mineralsCount = mineralsPerLayer * mineralNumber;
-                        pixel.MineralCount += mineralsCount;
-                        pixel.MineralCount = Math.Min(pixel.MineralCount, maxMinerals);
-                        pixel.IsDirty = true;
+                        pixel.MineralCount = mineralsCount;
+                    }
+                    else
+                    {
+                        pixel.MineralCount = 0;
                     }
                 }
             }

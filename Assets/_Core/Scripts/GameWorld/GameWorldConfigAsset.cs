@@ -13,6 +13,8 @@ namespace Genesis.GameWorld
         public int PixelSize { get; private set; } = 2;
         [field: SerializeField, Min(1)]
         public float DesiredFramerate { get; private set; } = 60f;
+        [field: SerializeField, Min(1)]
+        public int DrawEveryNthFrame { get; private set; } = 1;
         public float TickPeriod => 1f / DesiredFramerate;
     }
 }
