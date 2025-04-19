@@ -40,11 +40,19 @@ namespace Geneses.ArtLife
             var current = zero.Next;
             while (current != zero)
             {
+                var prev = current.Prev;
                 var cell = current.Cell;
-                var next = current.Next;
-                // Клетка может удалить себя из списка
                 cell.Tick();
-                current = next;
+                if (cell.Node == null)
+                {
+                    // Cell was removed
+                    current = prev.Next;
+                }
+                else
+                {
+                    // Cell is still alive
+                    current = current.Next;
+                }
             }
         }
 
