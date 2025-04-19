@@ -12,9 +12,8 @@
         int MineralsPerLayer { get; }
         int DeathOrganicSpawnCount { get; }
         int MineralMaxCount { get; }
+        float MineralsPhotosynthesisMultiplier { get; }
         int EnergySpendPerTick { get; }
-        int OverloadEnergyCount { get; }
-        int MineralDuplicationLimit { get; }
         int OrganicMaxCount { get; }
     }
 }

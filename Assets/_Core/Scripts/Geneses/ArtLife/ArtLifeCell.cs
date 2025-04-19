@@ -23,6 +23,7 @@ namespace Geneses.ArtLife
         public int TotalPhotosynthesisEnergy { get; private set; } // Всего энергии, полученной от фотосинтеза
         public int TotalMineralCount { get; private set; } // Всего поглощенных минералов
         public int TotalOrganicCount { get; private set; } // Всего поглощенной органики
+        public int AccumulatedMineralsCount { get; private set; }
 
         public ArtLifeCell(ArtLifeWorld world, ArtLifePixel position)
         {
@@ -84,19 +85,29 @@ namespace Geneses.ArtLife
                 return;
             }
 
+            /*
             if (Energy > _world.Config.OverloadEnergyCount)
             {
                 Position.MineralCount = Math.Min(_world.Config.MineralMaxCount,
                     Position.MineralCount + _world.Config.DeathOrganicSpawnCount);
                 Die_Naturally();
             }
+            */
+
+            AccumulateMinerals();
             
             ExecuteCommand();
             Age++;
             Energy -= _world.Config.EnergySpendPerTick;
             Position.IsDirty = true;
         }
-        
+
+        private void AccumulateMinerals()
+        {
+            AccumulatedMineralsCount += Position.MineralCount;
+            AccumulatedMineralsCount = Math.Min(AccumulatedMineralsCount, _world.Config.MineralMaxCount);
+        }
+
         public void MoveToPosition_IfEmpty(ArtLifePixel newPosition)
         {
             if (newPosition.IsEmpty)
@@ -120,24 +131,57 @@ namespace Geneses.ArtLife
             _world.RemoveCell(this);
         }
         
-        private ArtLifePixel FirstEmptySuitableForDuplication(int direction)
+        private ArtLifePixel FindFirstNeighbour(int startDirection, Predicate<ArtLifePixel> predicate)
         {
             for (int i = 0; i < 8; i++)
             {
-                var neighbor = Position.Neighbors[(direction + i) % 8];
-                // Подходят пустые клетки, в которых не слишком много минералов
-                if (neighbor.IsEmpty && neighbor.MineralCount < _world.Config.MineralDuplicationLimit)
+                var neighbor = Position.Neighbors[(Rotation + i) % 8];
+                if (predicate(neighbor))
                 {
                     return neighbor;
                 }
             }
-            
             return null;
+        }
+
+        // Поиск среды подходящих под критерий клетки с наибольшейшим значением метрики
+        private ArtLifePixel FindBestNeighbour(int startDirection, Predicate<ArtLifePixel> predicate,
+            Func<ArtLifePixel, float> metric, bool includeSelf = false)
+        {
+            ArtLifePixel bestPixel = null;
+            float bestValue = float.MinValue;
+            for (int i = 0; i < 8; i++)
+            {
+                var neighbor = Position.Neighbors[(Rotation + i) % 8];
+                if (predicate(neighbor))
+                {
+                    var value = metric(neighbor);
+                    if (value > bestValue)
+                    {
+                        bestValue = value;
+                        bestPixel = neighbor;
+                    }
+                }
+            }
+            
+            if (includeSelf && predicate(Position))
+            {
+                var value = metric(Position);
+                if (value > bestValue)
+                {
+                    bestValue = value;
+                    bestPixel = Position;
+                }
+            }
+            
+            return bestPixel;
         }
         
         private void Duplicate_EnoughEnergy()
         {
-            var freePosition = FirstEmptySuitableForDuplication((Rotation + GeneCounter) % 8);
+            var freePosition = FindFirstNeighbour((Rotation + GeneCounter) % 8,
+                p => p.IsEmpty && p.OrganicCount < _world.Config.OrganicMaxCount);
+
             if (freePosition != null)
             {
                 var newCell = _world.CreateCell(freePosition);
@@ -149,6 +193,12 @@ namespace Geneses.ArtLife
                 newCell.Rotation = Rotation;
                 newCell.Energy = Energy / 3;
                 Energy = Energy / 3;
+                newCell.AccumulatedMineralsCount = AccumulatedMineralsCount / 2;
+                AccumulatedMineralsCount = AccumulatedMineralsCount / 2;
+            }
+            else
+            {
+                Die_Naturally();
             }
         }
 
@@ -172,7 +222,7 @@ namespace Geneses.ArtLife
                 case 0: Photosynthesis(); break;
                 case 1: Move(); break;
                 case 2: ConsumeOrganics(); break;
-                case 3: ConsumeMinerals(); break;
+                case 3: ConvertMineralsToEnergy(); break;
                 case 4: Rotate(); break;
                 default:
                     GeneCounter += command;
@@ -190,8 +240,10 @@ namespace Geneses.ArtLife
         {
             if (Position.PhotosynthesisEnergy > 0)
             {
-                Energy += Position.PhotosynthesisEnergy;
-                TotalPhotosynthesisEnergy += Position.PhotosynthesisEnergy;
+                var mineralsMult = 1 + _world.Config.MineralsPhotosynthesisMultiplier * AccumulatedMineralsCount / _world.Config.MineralMaxCount;
+                var photosynthesisEnergy = Mathf.RoundToInt(Position.PhotosynthesisEnergy * mineralsMult);
+                Energy += photosynthesisEnergy;
+                TotalPhotosynthesisEnergy += photosynthesisEnergy;
             }
             GeneCounter += 1;
         }
@@ -206,22 +258,31 @@ namespace Geneses.ArtLife
         
         private void ConsumeOrganics()
         {
-            if (Position.OrganicCount > 0)
+            // Ищем пустую клетку с самым большим количеством органики рядом
+            var bestPosition = FindBestNeighbour((Rotation + GeneCounter) % 8,
+                p => p.IsEmpty && p.OrganicCount > 0,
+                p => p.OrganicCount,
+                includeSelf: true);
+            
+            if (bestPosition != null)
             {
-                Energy += Position.OrganicCount;
-                TotalOrganicCount += Position.OrganicCount;
-                Position.OrganicCount = 0;
+                // Потребляем органику
+                var consumedOrganics = bestPosition.OrganicCount;
+                bestPosition.OrganicCount = 0;
+                Energy += consumedOrganics;
+                TotalOrganicCount += consumedOrganics;
             }
+            
             GeneCounter += 1;
         }
         
-        private void ConsumeMinerals()
+        private void ConvertMineralsToEnergy()
         {
             if (Position.MineralCount > 0)
             {
-                Energy += Position.MineralCount;
-                TotalMineralCount += Position.MineralCount;
-                Position.MineralCount = 0;
+                Energy += AccumulatedMineralsCount;
+                TotalMineralCount += AccumulatedMineralsCount;
+                AccumulatedMineralsCount = 0;
             }
             GeneCounter += 1;
         }

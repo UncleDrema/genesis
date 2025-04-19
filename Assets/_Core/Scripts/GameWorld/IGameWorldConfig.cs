@@ -6,5 +6,6 @@
         int WorldHeight { get; }
         int PixelSize { get; }
         float TickPeriod { get; }
+        int DrawEveryNthFrame { get; }
     }
 }

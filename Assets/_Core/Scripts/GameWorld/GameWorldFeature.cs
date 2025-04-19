@@ -37,9 +37,16 @@ namespace Genesis.GameWorld
 
     public class GameWorldLateFeature : LateUpdateFeature
     {
+        private readonly IGameWorldConfig _config;
+
+        public GameWorldLateFeature(IGameWorldConfig config)
+        {
+            _config = config;
+        }
+        
         protected override void Initialize()
         {
-            AddSystem(new DrawGameWorldSystem());
+            AddSystem(new DrawGameWorldSystem(_config));
         }
     }
 }

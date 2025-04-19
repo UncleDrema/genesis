@@ -12,7 +12,7 @@ namespace Geneses.ArtLife
         private Color GetNonCellColor()
         {
             var greenFactor = Mathf.Clamp01(PhotosynthesisEnergy / 10f);
-            var mineralFactor = Mathf.Clamp01(MineralCount / 200f);
+            var mineralFactor = Mathf.Clamp01(MineralCount / 50f);
             var redFactor = Mathf.Clamp01(OrganicCount / 100f);
             
             var color = new Color(redFactor, greenFactor, mineralFactor);
