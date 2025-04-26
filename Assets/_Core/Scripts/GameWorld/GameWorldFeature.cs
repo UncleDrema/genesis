@@ -21,9 +21,11 @@ namespace Genesis.GameWorld
             RegisterRequest<PauseRequest>();
             RegisterRequest<ClickRequest>();
             RegisterRequest<InitializeGameWorldRequest>();
+            RegisterRequest<ResetGameWorldRequest>();
             
             AddInitializer(new InitializeTicksSystem(_config));
             
+            AddSystem(new ResetGameWorldSystem());
             AddSystem(new TransformClickRequestSystem());
             AddSystem(new PauseSystem());
             AddSystem(new TickSystem(_config));
@@ -32,6 +34,7 @@ namespace Genesis.GameWorld
             RegisterEvent<WorldInitializedEvent>();
             RegisterEvent<TickEvent>();
             RegisterEvent<PixelClickedEvent>();
+            RegisterEvent<WorldResetEvent>();
         }
     }
 
@@ -47,6 +50,7 @@ namespace Genesis.GameWorld
         protected override void Initialize()
         {
             AddSystem(new DrawGameWorldSystem(_config));
+            AddSystem(new InitializeWorldAfterResetSystem());
         }
     }
 }

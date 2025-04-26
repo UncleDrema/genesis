@@ -14,12 +14,15 @@ namespace Genesis.GameStartup
         
         [SerializeField]
         private GameWorldConfigAsset _gameWorldConfig;
+
+        [SerializeField]
+        private ArtLifeConfig _artLifeConfig;
         
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterSceneManagement(_sceneRepository);
             builder.RegisterGameWorld(_gameWorldConfig);
-            builder.RegisterArtLifeGenesis();
+            builder.RegisterArtLifeGenesis(_artLifeConfig);
         }
     }
 }

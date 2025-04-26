@@ -20,7 +20,7 @@ namespace Geneses.ArtLife
 
             if (x == width / 2 && y == height - height / 3)
             {
-                //_world.CreateCell(pixel).FillFromSource(LifePresets.SimpleLife(), 255);
+                _world.CreateCell(pixel).FillFromSource(LifePresets.SimpleLife(), 255);
             }
             
             return pixel;

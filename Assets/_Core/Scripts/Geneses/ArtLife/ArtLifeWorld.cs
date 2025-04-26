@@ -18,7 +18,7 @@ namespace Geneses.ArtLife
             _config = config;
         }
         
-        private readonly CellList _cellList = new();
+        private CellList _cellList = new();
 
         public ArtLifeCell CreateCell(ArtLifePixel pixel)
         {
@@ -82,6 +82,19 @@ namespace Geneses.ArtLife
                 for (var y = 0; y < height; y++)
                 {
                     var pixel = (ArtLifePixel) cWorld.Pixels[x][y];
+                    pixel.World = this;
+                    
+                    var worldCenter = new Vector2(width / 2, height / 2 - height / 4);
+                    var pos = new Vector2(x, y);
+                    var diff = (worldCenter - pos);
+                    diff.x /= 4;
+                    diff.y *= 3;
+                    var distanceToCenter = diff.magnitude;
+                    if (distanceToCenter <= _config.RadiationRadius)
+                    {
+                        var radiationLevel = Mathf.Clamp01(1 - distanceToCenter / _config.RadiationRadius);
+                        pixel.RadiationLevel = radiationLevel;
+                    }
 
                     if (y >= minPhotosynthesisHeight)
                     {
@@ -111,6 +124,31 @@ namespace Geneses.ArtLife
         private float Remap(float value, float from1, float to1, float from2, float to2)
         {
             return from2 + (to2 - from2) * ((value - from1) / (to1 - from1));
+        }
+
+        public void ResetWorld()
+        {
+            _cellList = new CellList();
+            Width = 0;
+            Height = 0;
+        }
+
+        public void ClearOrganic(ref WorldComponent cWorld)
+        {
+            var width = cWorld.Width;
+            var height = cWorld.Height;
+            
+            for (var x = 0; x < width; x++)
+            {
+                for (var y = 0; y < height; y++)
+                {
+                    var pixel = (ArtLifePixel) cWorld.Pixels[x][y];
+                    if (pixel.Content is PixelContentType.Organic)
+                    {
+                        pixel.MakeEmpty();
+                    }
+                }
+            }
         }
     }
 }

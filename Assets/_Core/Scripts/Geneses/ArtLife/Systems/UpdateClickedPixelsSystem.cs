@@ -1,8 +1,10 @@
 ﻿using Geneses.ArtLife.Components;
 using Geneses.ArtLife.ConstructingLife;
+using Geneses.ArtLife.Requests;
 using Genesis.Common.Components;
 using Genesis.GameWorld.Events;
 using Scellecs.Morpeh;
+using Scellecs.Morpeh.Addons.Feature.Events;
 using Scellecs.Morpeh.Addons.Systems;
 using Unity.IL2CPP.CompilerServices;
 using UnityEngine;
@@ -27,6 +29,7 @@ namespace Geneses.ArtLife.Systems
         {
             foreach (var ev in _clickedPixels)
             {
+                World.CreateEventEntity<UpdateDisplayRequest>();
                 ref var cPixelClicked = ref ev.GetComponent<PixelClickedEvent>();
                 var pixel = (ArtLifePixel)cPixelClicked.Pixel;
                 
@@ -37,11 +40,19 @@ namespace Geneses.ArtLife.Systems
                     
                     // Если в пикселе уже есть клетка, то ничего не делаем
                     if (pixel.Cell != null)
-                        continue;
+                    {
+                        ref var cCellInfoRequest = ref World.CreateEventEntity<DisplayCellInfoRequest>();
+                        cCellInfoRequest.Cell = pixel.Cell;
+                    }
+                    else if (pixel.IsEmpty)
+                    {
+                        ref var cCreatePresetCellRequest = ref World.CreateEventEntity<CreatePresetCellRequest>();
+                        cCreatePresetCellRequest.Position = pixel;
 
-                    // Создаем клетку и заполняем ее геномом
-                    var cell = cArtLifeWorld.ArtLifeWorld.CreateCell(pixel);
-                    cell.FillFromSource(LifePresets.SimpleLife(), 255);
+                        pixel.MakeWall();
+                        //var cell = cArtLifeWorld.ArtLifeWorld.CreateCell(pixel);
+                        //cell.FillFromSource(LifePresets.PredatorLife(), 255);
+                    }
                 }
             }
         }

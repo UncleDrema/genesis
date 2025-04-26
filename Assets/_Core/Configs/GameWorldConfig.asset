@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69eadd92c389492bbd91ee1bf731552d, type: 3}
   m_Name: GameWorldConfig
   m_EditorClassIdentifier: 
-  <WorldWidth>k__BackingField: 355
-  <WorldHeight>k__BackingField: 270
-  <PixelSize>k__BackingField: 4
-  <DesiredFramerate>k__BackingField: 12
+  <WorldWidth>k__BackingField: 177
+  <WorldHeight>k__BackingField: 135
+  <PixelSize>k__BackingField: 8
+  <DesiredFramerate>k__BackingField: 608
+  <DrawEveryNthFrame>k__BackingField: 1
