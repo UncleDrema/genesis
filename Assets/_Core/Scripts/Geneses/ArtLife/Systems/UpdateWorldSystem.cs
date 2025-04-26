@@ -1,4 +1,5 @@
 ﻿using Geneses.ArtLife.Components;
+using Geneses.ArtLife.Requests;
 using Genesis.Common.Components;
 using Genesis.GameWorld.Events;
 using Scellecs.Morpeh;
@@ -14,11 +15,15 @@ namespace Geneses.ArtLife.Systems
     {
         private Filter _world;
         private Filter _ticks;
+        private Filter _clearOrganicRequests;
         
         public override void OnAwake()
         {
             _ticks = World.Filter
                 .With<TickEvent>()
+                .Build();
+            _clearOrganicRequests = World.Filter
+                .With<ClearOrganicRequest>()
                 .Build();
             _world = World.Filter
                 .With<WorldComponent>()
@@ -37,6 +42,17 @@ namespace Geneses.ArtLife.Systems
                     
                     //cArtLifeWorld.ArtLifeWorld.UpdatePixels(ref cWorld);
                     cArtLifeWorld.ArtLifeWorld.Tick();
+                }
+            }
+            
+            foreach (var request in _clearOrganicRequests)
+            {
+                foreach (var world in _world)
+                {
+                    ref var cWorld = ref world.GetComponent<WorldComponent>();
+                    ref var cArtLifeWorld = ref world.GetComponent<ArtLifeWorldComponent>();
+                    
+                    cArtLifeWorld.ArtLifeWorld.ClearOrganic(ref cWorld);
                 }
             }
         }

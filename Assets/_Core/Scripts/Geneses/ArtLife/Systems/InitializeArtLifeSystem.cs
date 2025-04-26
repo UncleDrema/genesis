@@ -38,6 +38,9 @@ namespace Geneses.ArtLife.Systems
                 ref var cArtLifeWorld = ref world.AddComponent<ArtLifeWorldComponent>();
                 cArtLifeWorld.ArtLifeWorld = _artLifeWorld;
                 _artLifeWorld.InitWorld(ref cWorld);
+
+                ref var cDisplay = ref world.AddComponent<ArtLifeDisplayComponent>();
+                cDisplay.DisplayedCell = null;
             }
         }
     }

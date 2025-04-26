@@ -14,6 +14,7 @@ namespace Geneses.ArtLife
         
         // Параметры клетки
         public byte[] Genome { get; private set; } = new byte[256];
+        public int PrevGeneCounter { get; private set; } // индекс предыдущей активной ячейки генома
         public int GeneCounter { get; private set; } // индекс текущей активной ячейки генома
         public int Rotation { get; private set; } // направление от 0 (вправо) до 7 (право-вниз)
         public ArtLifePixel Position { get; set; } // позиция в мире
@@ -24,8 +25,9 @@ namespace Geneses.ArtLife
         public int TotalMineralEnergy { get; private set; } // Всего энергии, полученной от минералов
         public int TotalOrganicEnergy { get; private set; } // Всего энергии, полученной от органики
         public int AccumulatedMineralsCount { get; private set; } // Количество накопленных минералов
-        public int ExecutedCommandsInCycle { get; private set; } // Количество выполненных команд в текущем цикле
-        public bool BreakExecution { get; private set; } // Признак того, что клетка должна прервать выполнение команд в текущем цикле
+        
+        private int ExecutedCommandsInCycle { get; set; } // Количество выполненных команд в текущем цикле
+        private bool BreakExecution { get; set; } // Признак того, что клетка должна прервать выполнение команд в текущем цикле
 
         public ArtLifeCell(ArtLifeWorld world, ArtLifePixel position)
         {
@@ -35,6 +37,8 @@ namespace Geneses.ArtLife
             {
                 Genome[i] = 0;
             }
+
+            PrevGeneCounter = 0;
             GeneCounter = 0;
             Rotation = 0;
             Position = position;
@@ -81,6 +85,9 @@ namespace Geneses.ArtLife
         
         public void Tick()
         {
+            if (Random.value < _world.Config.MutationChance)
+                Mutate();
+            
             Position.IsDirty = true;
             Energy -= _world.Config.EnergySpendPerTick;
             
@@ -88,6 +95,20 @@ namespace Geneses.ArtLife
             {
                 Die_Organic();
                 return;
+            }
+            
+            // Проверяем уровень радиации
+            var radiationLevel = Position.RadiationLevel;
+            var mineralProtection = 0.95f * Mathf.Clamp01((float) AccumulatedMineralsCount / _world.Config.MaxAccumulatedMinerals);
+            if (Random.value < _world.Config.RadiationChance * radiationLevel * (1 - mineralProtection))
+            {
+                //Die_Organic();
+                return;
+            }
+            
+            if (Random.value < 10f * _world.Config.RadiationChance * radiationLevel * (1 - mineralProtection))
+            {
+                Mutate();
             }
             
             /*
@@ -210,20 +231,22 @@ namespace Geneses.ArtLife
         private void Duplicate_Impl()
         {
             var freePosition = FindFirstNeighbour((Rotation + Age) % 8, p => p.IsEmpty);
-
+            Energy -= _world.Config.EnergyFromOrganic;
+            if (Energy <= 0)
+                return;
             if (freePosition != null)
             {
                 var newCell = _world.CreateCell(freePosition);
                 newCell.CopyGenomeFrom(this);
-                if (Random.value < _world.Config.MutationChance)
+                if (Random.value < _world.Config.DuplicateMutationChance)
                 {
                     newCell.Mutate();
                 }
                 newCell.Rotation = Random.Range(0, 8);
-                newCell.Energy = Energy / 2;
-                Energy = Energy / 2;
-                newCell.AccumulatedMineralsCount = AccumulatedMineralsCount / 2;
-                AccumulatedMineralsCount = AccumulatedMineralsCount / 2;
+                newCell.Energy = Energy / 3;
+                Energy = Energy / 3;
+                newCell.AccumulatedMineralsCount = AccumulatedMineralsCount / 3;
+                AccumulatedMineralsCount = AccumulatedMineralsCount / 3;
             }
             else
             {
@@ -264,13 +287,8 @@ namespace Geneses.ArtLife
         private void ExecuteCommand()
         {
             byte command = Genome[GeneCounter];
-            /*
-            Debug.Log($"Pointer at genome value: {command}");
-            if (Enum.GetValues(typeof(LifeBuilder.ArtLifeGenome)).Cast<LifeBuilder.ArtLifeGenome>().Any(g => (byte)g == command))
-            {
-                Debug.Log($"\tCommand: {(LifeBuilder.ArtLifeGenome)command}");
-            }
-            */
+            PrevGeneCounter = GeneCounter;
+            
             switch (command)
             {
                 case 0: Photosynthesis(); StopExecuting(); break;
@@ -366,26 +384,28 @@ namespace Geneses.ArtLife
         {
             var direction = GetDirection(absolute);
             var positionToMove = Position.Neighbors[direction];
+            var posArg = GetArgumentNoFromPosition(positionToMove);
             MoveToPosition_IfEmpty(positionToMove);
-            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(positionToMove));
+            GeneCounter += GetGeneArgument(posArg);
         }
 
         private void Look(bool absolute)
         {
             var direction = GetDirection(absolute);
             var positionToLook = Position.Neighbors[direction];
-            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(positionToLook));
+            var posArg = GetArgumentNoFromPosition(positionToLook);
+            GeneCounter += GetGeneArgument(posArg);
         }
 
         private void AlignHorizontal()
         {
             if (Random.value > 0.5f)
             {
-                Rotation = (byte) LifeBuilder.Direction.Right;
+                Rotation = AbsoluteDirection.Right.Value();
             }
             else
             {
-                Rotation = (byte) LifeBuilder.Direction.Left;
+                Rotation = AbsoluteDirection.Left.Value();
             }
             GeneCounter += 1;
         }
@@ -394,11 +414,11 @@ namespace Geneses.ArtLife
         {
             if (Random.value > 0.5f)
             {
-                Rotation = (byte) LifeBuilder.Direction.Up;
+                Rotation = AbsoluteDirection.Up.Value();
             }
             else
             {
-                Rotation = (byte) LifeBuilder.Direction.Down;
+                Rotation = AbsoluteDirection.Down.Value();
             }
             GeneCounter += 1;
         }
@@ -407,6 +427,7 @@ namespace Geneses.ArtLife
         {
             var direction = GetDirection(absolute);
             var position = Position.Neighbors[direction];
+            var posArg = GetArgumentNoFromPosition(position);
             if (position.Content is PixelContentType.Cell)
             {
                 var other = position.Cell!;
@@ -424,13 +445,14 @@ namespace Geneses.ArtLife
                     AccumulatedMineralsCount = totalMinerals / 2;
                 }
             }
-            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(position));
+            GeneCounter += GetGeneArgument(posArg);
         }
 
         private void Gift(bool absolute)
         {
             var direction = GetDirection(absolute);
             var position = Position.Neighbors[direction];
+            var posArg = GetArgumentNoFromPosition(position);
             if (position.Content is PixelContentType.Cell)
             {
                 var other = position.Cell!;
@@ -454,19 +476,21 @@ namespace Geneses.ArtLife
                     }
                 }
             }
-            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(position));
+            GeneCounter += GetGeneArgument(posArg);
         }
 
         private void Eat(bool absolute)
         {
             var direction = GetDirection(absolute);
             var positionToEat = Position.Neighbors[direction];
+            var posArg = GetArgumentNoFromPosition(positionToEat);
             
             // Съедаем органику
             if (positionToEat.Content is PixelContentType.Organic)
             {
                 Energy += _world.Config.EnergyFromOrganic;
                 positionToEat.MakeEmpty();
+                MoveToPosition_IfEmpty(positionToEat);
             }
             // Нападаем на клетку
             else if (positionToEat.Content is PixelContentType.Cell)
@@ -478,6 +502,7 @@ namespace Geneses.ArtLife
                     var gainedEnergy = _world.Config.EnergyFromOrganic + other.Energy / 2;
                     GainOrganicEnergy(gainedEnergy);
                     other.Die_NoOrganic();
+                    MoveToPosition_IfEmpty(positionToEat);
                 }
                 else
                 {
@@ -489,6 +514,7 @@ namespace Geneses.ArtLife
                         var gainedEnergy = _world.Config.EnergyFromOrganic + other.Energy / 2 - other.AccumulatedMineralsCount * 2;
                         GainOrganicEnergy(gainedEnergy);
                         other.Die_NoOrganic();
+                        MoveToPosition_IfEmpty(positionToEat);
                     }
                     else
                     {
@@ -498,7 +524,7 @@ namespace Geneses.ArtLife
                 }
             }
 
-            GeneCounter += GetGeneArgument(GetArgumentNoFromPosition(positionToEat));
+            GeneCounter += GetGeneArgument(posArg);
         }
 
 
@@ -564,23 +590,25 @@ namespace Geneses.ArtLife
 
         private void CheckSurrounded()
         {
-            var surrounded = true;
+            var surroundedCount = 8;
             for (int i = 0; i < 8; i++)
             {
                 if (Position.Neighbors[i].IsEmpty)
                 {
-                    surrounded = false;
-                    break;
+                    surroundedCount--;
                 }
             }
+            
+            var surroundedLevel = (float) surroundedCount / 8;
+            var requiredSurroundedLevel = GetGeneArgument(1) / 255f;
 
-            if (surrounded)
+            if (surroundedLevel >= requiredSurroundedLevel)
             {
-                GeneCounter += GetGeneArgument(1);
+                GeneCounter += GetGeneArgument(2);
             }
             else
             {
-                GeneCounter += GetGeneArgument(2);
+                GeneCounter += GetGeneArgument(3);
             }
         }
 

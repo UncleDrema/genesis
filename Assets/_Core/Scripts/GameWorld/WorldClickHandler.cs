@@ -17,6 +17,11 @@ namespace Genesis.GameWorld
             {
                 World.Default.CreateEventEntity<PauseRequest>();
             }
+
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                World.Default.CreateEventEntity<ResetGameWorldRequest>();
+            }
         }
 
         public void OnPointerClick(PointerEventData ev)

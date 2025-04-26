@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-using UnityEngine.UIElements;
+using Geneses.ArtLife.ConstructingLife.Tokens;
 
 namespace Geneses.ArtLife.ConstructingLife
 {
@@ -13,6 +12,11 @@ namespace Geneses.ArtLife.ConstructingLife
         public LifeBuilder()
         {
             _tokens = new List<LifeToken>();
+        }
+        
+        public List<LifeToken> GetRawTokens()
+        {
+            return _tokens;
         }
 
         public byte[] Build()
@@ -73,6 +77,19 @@ namespace Geneses.ArtLife.ConstructingLife
             _tokens.Add(label);
             return this;
         }
+        
+        public LifeBuilder CheckSurrounded(byte level, string ifLabel, string elseLabel)
+        {
+            var checkSurrounded = new GenomeOperation(ArtLifeGenome.CheckSurrounded);
+            var levelArg = new GenomeOperationArgument(level);
+            var ifLabelPlaceholder = new LabelPlaceholder(ifLabel, 2);
+            var elseLabelPlaceholder = new LabelPlaceholder(elseLabel, 3);
+            _tokens.Add(checkSurrounded);
+            _tokens.Add(levelArg);
+            _tokens.Add(ifLabelPlaceholder);
+            _tokens.Add(elseLabelPlaceholder);
+            return this;
+        }
 
         public LifeBuilder CheckEnergy(byte level, string ifLabel, string elseLabel)
         {
@@ -87,7 +104,7 @@ namespace Geneses.ArtLife.ConstructingLife
             return this;
         }
         
-        public void CheckMinerals(byte level, string ifLabel, string elseLabel)
+        public LifeBuilder CheckMinerals(byte level, string ifLabel, string elseLabel)
         {
             var checkMinerals = new GenomeOperation(ArtLifeGenome.CheckMinerals);
             var levelArg = new GenomeOperationArgument(level);
@@ -97,9 +114,10 @@ namespace Geneses.ArtLife.ConstructingLife
             _tokens.Add(levelArg);
             _tokens.Add(ifLabelPlaceholder);
             _tokens.Add(elseLabelPlaceholder);
+            return this;
         }
         
-        public void CheckPhotosynthesisFlow(byte level, string ifLabel, string elseLabel)
+        public LifeBuilder CheckPhotosynthesisFlow(byte level, string ifLabel, string elseLabel)
         {
             var checkMinerals = new GenomeOperation(ArtLifeGenome.CheckPhotosynthesisFlow);
             var levelArg = new GenomeOperationArgument(level);
@@ -109,9 +127,10 @@ namespace Geneses.ArtLife.ConstructingLife
             _tokens.Add(levelArg);
             _tokens.Add(ifLabelPlaceholder);
             _tokens.Add(elseLabelPlaceholder);
+            return this;
         }
         
-        public void CheckMineralsFlow(byte level, string ifLabel, string elseLabel)
+        public LifeBuilder CheckMineralsFlow(byte level, string ifLabel, string elseLabel)
         {
             var checkMinerals = new GenomeOperation(ArtLifeGenome.CheckMineralFlow);
             var levelArg = new GenomeOperationArgument(level);
@@ -121,9 +140,10 @@ namespace Geneses.ArtLife.ConstructingLife
             _tokens.Add(levelArg);
             _tokens.Add(ifLabelPlaceholder);
             _tokens.Add(elseLabelPlaceholder);
+            return this;
         }
         
-        public void CheckHeight(byte level, string ifLabel, string elseLabel)
+        public LifeBuilder CheckHeight(byte level, string ifLabel, string elseLabel)
         {
             var checkHeight = new GenomeOperation(ArtLifeGenome.CheckHeight);
             var levelArg = new GenomeOperationArgument(level);
@@ -133,6 +153,7 @@ namespace Geneses.ArtLife.ConstructingLife
             _tokens.Add(levelArg);
             _tokens.Add(ifLabelPlaceholder);
             _tokens.Add(elseLabelPlaceholder);
+            return this;
         }
 
         public LifeBuilder Duplicate()
@@ -142,7 +163,7 @@ namespace Geneses.ArtLife.ConstructingLife
             return this;
         }
 
-        public LifeBuilder Rotate(Direction direction, bool absolute)
+        public LifeBuilder Rotate(byte direction, bool absolute)
         {
             var rotate = absolute
                 ? new GenomeOperation(ArtLifeGenome.AbsoluteRotate)
@@ -153,7 +174,7 @@ namespace Geneses.ArtLife.ConstructingLife
             return this;
         }
 
-        public LifeBuilder Move(Direction direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
+        public LifeBuilder Move(byte direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
         {
             var movePosition = _tokens.Count(t => t is not Label);
             var label = new Label($"Move_{movePosition}");
@@ -175,7 +196,7 @@ namespace Geneses.ArtLife.ConstructingLife
             return this;
         }
         
-        public LifeBuilder Look(Direction direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
+        public LifeBuilder Look(byte direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
         {
             var lookPosition = _tokens.Count(t => t is not Label);
             var label = new Label($"Look_{lookPosition}");
@@ -197,7 +218,7 @@ namespace Geneses.ArtLife.ConstructingLife
             return this;
         }
         
-        public LifeBuilder Eat(Direction direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
+        public LifeBuilder Eat(byte direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
         {
             var eatPosition = _tokens.Count(t => t is not Label);
             var label = new Label($"Eat_{eatPosition}");
@@ -219,7 +240,7 @@ namespace Geneses.ArtLife.ConstructingLife
             return this;
         }
         
-        public LifeBuilder Share(Direction direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
+        public LifeBuilder Share(byte direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
         {
             var sharePosition = _tokens.Count(t => t is not Label);
             var label = new Label($"Share_{sharePosition}");
@@ -241,7 +262,7 @@ namespace Geneses.ArtLife.ConstructingLife
             return this;
         }
         
-        public LifeBuilder Gift(Direction direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
+        public LifeBuilder Gift(byte direction, bool absolute, string ifEmpty = null, string ifWall = null, string ifOrganic = null, string ifCell = null)
         {
             var giftPosition = _tokens.Count(t => t is not Label);
             var label = new Label($"Gift_{giftPosition}");
@@ -269,15 +290,25 @@ namespace Geneses.ArtLife.ConstructingLife
             _tokens.Add(photosynthesis);
             return this;
         }
-
-        public LifeBuilder CheckSurrounded(string ifLabel, string elseLabel)
+        
+        public LifeBuilder AlighHorizontal()
         {
-            var checkSurrounded = new GenomeOperation(ArtLifeGenome.CheckSurrounded);
-            var ifLabelPlaceholder = new LabelPlaceholder(ifLabel, 1);
-            var elseLabelPlaceholder = new LabelPlaceholder(elseLabel, 2);
-            _tokens.Add(checkSurrounded);
-            _tokens.Add(ifLabelPlaceholder);
-            _tokens.Add(elseLabelPlaceholder);
+            var alignHorizontal = new GenomeOperation(ArtLifeGenome.AlignHorizontal);
+            _tokens.Add(alignHorizontal);
+            return this;
+        }
+        
+        public LifeBuilder AlignVertical()
+        {
+            var alignVertical = new GenomeOperation(ArtLifeGenome.AlignVertical);
+            _tokens.Add(alignVertical);
+            return this;
+        }
+        
+        public LifeBuilder Jump(byte offset)
+        {
+            var jump = new Jump(offset);
+            _tokens.Add(jump);
             return this;
         }
         
@@ -288,89 +319,11 @@ namespace Geneses.ArtLife.ConstructingLife
             return this;
         }
 
-        private class LifeToken { }
-
-        private class Label : LifeToken
+        public LifeBuilder ConvertMinerals()
         {
-            public string Name { get; }
-            
-            public Label(string name)
-            {
-                Name = name;
-            }
-        }
-        
-        private class LabelPlaceholder : LifeToken
-        {
-            public string Name { get; }
-            
-            public int OffsetFromBranch { get; }
-            
-            public LabelPlaceholder(string name, int offsetFromBranch)
-            {
-                Name = name;
-                OffsetFromBranch = offsetFromBranch;
-            }
-        }
-
-        private class GenomeOperation : LifeToken
-        {
-            public ArtLifeGenome Genome { get; }
-            
-            public GenomeOperation(ArtLifeGenome genome)
-            {
-                Genome = genome;
-            }
-        }
-
-        private class GenomeOperationArgument : LifeToken
-        {
-            public byte Value { get; }
-            
-            public GenomeOperationArgument(byte value)
-            {
-                Value = value;
-            }
-        }
-
-        public enum ArtLifeGenome : byte
-        {
-            Photosynthesis = 0,
-            AbsoluteRotate = 1,
-            RelativeRotate = 2,
-            AbsoluteMove = 3,
-            RelativeMove = 4,
-            AbsoluteLook = 5,
-            RelativeLook = 6,
-            AlignHorizontal = 7,
-            AlignVertical = 8,
-            AbsoluteShare = 9,
-            RelativeShare = 10,
-            AbsoluteGift = 11,
-            RelativeGift = 12,
-            AbsoluteEat = 13,
-            RelativeEat = 14,
-            ConvertMinerals = 15,
-            Duplicate = 16,
-            CheckEnergy = 17,
-            CheckHeight = 18,
-            CheckMinerals = 19,
-            CheckSurrounded = 20,
-            CheckPhotosynthesisFlow = 21,
-            CheckMineralFlow = 22,
-            Exit = 255
-        }
-
-        public enum Direction : byte
-        {
-            Right = 0,
-            DownRight = 1,
-            Down = 2,
-            DownLeft = 3,
-            Left = 4,
-            UpLeft = 5,
-            Up = 6,
-            UpRight = 7
+            var convertMinerals = new GenomeOperation(ArtLifeGenome.ConvertMinerals);
+            _tokens.Add(convertMinerals);
+            return this;
         }
     }
 }

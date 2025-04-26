@@ -1,4 +1,6 @@
-﻿namespace Geneses.ArtLife
+﻿using System.Collections.Generic;
+
+namespace Geneses.ArtLife
 {
     public class CellList
     {

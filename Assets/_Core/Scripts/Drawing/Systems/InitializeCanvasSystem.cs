@@ -1,4 +1,5 @@
-﻿using Genesis.Drawing.Requests;
+﻿using Genesis.Common;
+using Genesis.Drawing.Requests;
 using Genesis.Drawing.Components;
 using Scellecs.Morpeh.Collections;
 using UnityEngine;
@@ -30,8 +31,8 @@ namespace Genesis.Drawing.Systems
             {
                 ref var cReq = ref initRequest.GetComponent<InitializeCanvasRequest>();
                 ref var cRenderer = ref initRequest.GetComponent<RendererComponent>();
-                ref var cCanvas = ref initRequest.AddComponent<CanvasComponent>();
-                ref var cBuffer = ref initRequest.AddComponent<SetPixelsBufferComponent>();
+                ref var cCanvas = ref initRequest.GetOrAddComponent<CanvasComponent>();
+                ref var cBuffer = ref initRequest.GetOrAddComponent<SetPixelsBufferComponent>();
                 
                 cCanvas.Width = cReq.Width;
                 cCanvas.Height = cReq.Height;

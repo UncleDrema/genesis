@@ -7,6 +7,8 @@ namespace Geneses.ArtLife
 {
     public class ArtLifePixel : IPixel
     {
+        public ArtLifeWorld World { get; set; }
+        
         public bool IsDirty { get; set; }
         
         public int X { get; set; }
@@ -15,26 +17,45 @@ namespace Geneses.ArtLife
 
         public Color32 Color
         {
-            get
+            get => GetColor();
+        }
+
+        private Color GetColor()
+        {
+            if (World.Config.DrawMode == DrawMode.Default)
             {
-                switch (Content)
-                {
-                    case PixelContentType.Empty:
-                        return GetEmptyColor();
-                        break;
-                    case PixelContentType.Cell:
-                        return Cell!.GetColor();
-                        break;
-                    case PixelContentType.Wall:
-                        return UnityEngine.Color.black;
-                        break;
-                    case PixelContentType.Organic:
-                        return UnityEngine.Color.grey;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                return GetDefaultColor();
             }
+            else
+            {
+                return UnityEngine.Color.black;
+            }
+        }
+
+        private Color GetDefaultColor()
+        {
+            Color color;
+            switch (Content)
+            {
+                case PixelContentType.Empty:
+                    color = GetEmptyColor();
+                    break;
+                case PixelContentType.Cell:
+                    color = Cell!.GetColor();
+                    break;
+                case PixelContentType.Wall:
+                    color = UnityEngine.Color.black;
+                    break;
+                case PixelContentType.Organic:
+                    color = UnityEngine.Color.grey;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            var radiationFactor = Mathf.Clamp01(RadiationLevel);
+            color.r = Mathf.Lerp(color.r, 1f, radiationFactor);
+            return color;
         }
 
         private Color GetEmptyColor()
@@ -59,7 +80,8 @@ namespace Geneses.ArtLife
         public int PhotosynthesisEnergy { get; set; } = 0;
         
         public int MineralCount { get; set; } = 0;
-        
+        public float RadiationLevel { get; set; } = 0;
+
         public void SetCell(ArtLifeCell cell)
         {
             Content = PixelContentType.Cell;

@@ -199,6 +199,7 @@ MonoBehaviour:
   - {fileID: 6103091868253823481}
   _sceneRepository: {fileID: 11400000, guid: dd357af377ecbe743bcc4eea7be8a1c1, type: 2}
   _gameWorldConfig: {fileID: 11400000, guid: 3488af8c0b8bfb04499f1183dd84d403, type: 2}
+  _artLifeConfig: {fileID: 11400000, guid: 81d4f53b51efbd849bfffbac00f3d9b0, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
