@@ -46,6 +46,7 @@ jobs:
         with:
           targetPlatform: StandaloneWindows64
           customImage: 'unityci/editor:ubuntu-2022.3.40f1-windows-mono-3.1.0'
+          buildName: 'genesis'
 
       # Output
       - uses: actions/upload-artifact@v4
