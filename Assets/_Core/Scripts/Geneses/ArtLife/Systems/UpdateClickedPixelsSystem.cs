@@ -1,4 +1,5 @@
-﻿using Geneses.ArtLife.Components;
+﻿using System;
+using Geneses.ArtLife.Components;
 using Geneses.ArtLife.ConstructingLife;
 using Geneses.ArtLife.Requests;
 using Genesis.Common.Components;
@@ -8,6 +9,7 @@ using Scellecs.Morpeh.Addons.Feature.Events;
 using Scellecs.Morpeh.Addons.Systems;
 using Unity.IL2CPP.CompilerServices;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Geneses.ArtLife.Systems
 {
@@ -29,31 +31,93 @@ namespace Geneses.ArtLife.Systems
         {
             foreach (var ev in _clickedPixels)
             {
-                World.CreateEventEntity<UpdateDisplayRequest>();
                 ref var cPixelClicked = ref ev.GetComponent<PixelClickedEvent>();
-                var pixel = (ArtLifePixel)cPixelClicked.Pixel;
-                
-                foreach (var world in _world)
+                var startingPixel = (ArtLifePixel)cPixelClicked.Pixel;
+
+                if (cPixelClicked.Button == PointerEventData.InputButton.Right)
                 {
-                    ref var cWorld = ref world.GetComponent<WorldComponent>();
-                    ref var cArtLifeWorld = ref world.GetComponent<ArtLifeWorldComponent>();
-                    
-                    // Если в пикселе уже есть клетка, то ничего не делаем
-                    if (pixel.Cell != null)
+                    World.CreateEventEntity<UpdateDisplayRequest>();
+                    if (startingPixel.Cell != null)
                     {
                         ref var cCellInfoRequest = ref World.CreateEventEntity<DisplayCellInfoRequest>();
-                        cCellInfoRequest.Cell = pixel.Cell;
-                    }
-                    else if (pixel.IsEmpty)
-                    {
-                        ref var cCreatePresetCellRequest = ref World.CreateEventEntity<CreatePresetCellRequest>();
-                        cCreatePresetCellRequest.Position = pixel;
-
-                        pixel.MakeWall();
-                        //var cell = cArtLifeWorld.ArtLifeWorld.CreateCell(pixel);
-                        //cell.FillFromSource(LifePresets.PredatorLife(), 255);
+                        cCellInfoRequest.Cell = startingPixel.Cell;
                     }
                 }
+                else if (cPixelClicked.Button == PointerEventData.InputButton.Left)
+                {
+                    foreach (var world in _world)
+                    {
+                        ref var cWorld = ref world.GetComponent<WorldComponent>();
+                        ref var cArtLifeWorld = ref world.GetComponent<ArtLifeWorldComponent>();
+
+                        var toolSize = cArtLifeWorld.ArtLifeWorld.ToolSize;
+                        var pixelsInRange =
+                            cArtLifeWorld.ArtLifeWorld.GetPixelsInRange(ref cWorld, startingPixel, toolSize);
+
+                        foreach (var pixel in pixelsInRange)
+                        {
+                            UseTool(pixel, cArtLifeWorld.ArtLifeWorld);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UseTool(ArtLifePixel pixel, ArtLifeWorld world)
+        {
+            switch (world.Tool)
+            {
+                case ToolType.SpawnCell:
+                    SpawnCellTool(pixel, world);
+                    break;
+                case ToolType.SpawnWall:
+                    SpawnWallTool(pixel, world);
+                    break;
+                case ToolType.SpawnOrganic:
+                    SpawnOrganicTool(pixel, world);
+                    break;
+                case ToolType.Clear:
+                    ClearTool(pixel, world);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(world.Tool), world.Tool, null);
+            }
+        }
+
+        private void ClearTool(ArtLifePixel pixel, ArtLifeWorld world)
+        {
+            if (!pixel.IsEmpty)
+            {
+                if (pixel.Cell != null)
+                {
+                    world.RemoveCell(pixel.Cell);
+                }
+                pixel.MakeEmpty();
+            }
+        }
+
+        private void SpawnOrganicTool(ArtLifePixel pixel, ArtLifeWorld world)
+        {
+            if (pixel.IsEmpty)
+            {
+                pixel.MakeOrganic();
+            }
+        }
+
+        private void SpawnWallTool(ArtLifePixel pixel, ArtLifeWorld world)
+        {
+            if (pixel.IsEmpty)
+            {
+                pixel.MakeWall();
+            }
+        }
+
+        private void SpawnCellTool(ArtLifePixel pixel, ArtLifeWorld world)
+        {
+            if (pixel.IsEmpty)
+            {
+                var cell = world.CreateCell(pixel);
+                cell.FillFromSource(world.SpawningCellGenome, 255);
             }
         }
     }

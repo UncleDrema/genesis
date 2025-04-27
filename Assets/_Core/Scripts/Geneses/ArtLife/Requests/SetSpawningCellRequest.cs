@@ -8,8 +8,8 @@ namespace Geneses.ArtLife.Requests
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public struct CreatePresetCellRequest : IComponent
+    public struct SetSpawningCellRequest : IComponent
     {
-        public ArtLifePixel Position;
+        public byte[] SpawningCellGenome;
     }
 }

@@ -15,13 +15,14 @@ namespace Geneses.ArtLife
         
         protected override void Initialize()
         {
-            RegisterRequest<CreatePresetCellRequest>();
             RegisterRequest<UpdateCurrentViewRequest>();
             RegisterRequest<DisplayCellInfoRequest>();
             RegisterRequest<UpdateDisplayRequest>();
             RegisterRequest<ClearOrganicRequest>();
             RegisterRequest<SetToolRequest>();
             RegisterRequest<SetDrawModeRequest>();
+            RegisterRequest<SetSpawningCellRequest>();
+            RegisterRequest<SetToolSizeRequest>();
             
             AddSystem(new ResetArtLifeSystem());
             AddSystem(new InitializeArtLifeSystem(_artLifeWorld));

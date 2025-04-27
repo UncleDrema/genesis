@@ -20,7 +20,7 @@ namespace Genesis.GameWorld.Systems
         public override void OnAwake()
         {
             _clickRequests = World.Filter.With<ClickRequest>().Build();
-            _world = World.Filter.With<WorldComponent>().Build();
+            _world = World.Filter.With<WorldComponent>().Without<PixelClickedEvent>().Build();
         }
 
         public override void OnUpdate(float deltaTime)
@@ -33,11 +33,17 @@ namespace Genesis.GameWorld.Systems
                 {
                     ref var cWorld = ref world.GetComponent<WorldComponent>();
                     pos /= cWorld.PixelSize;
-                    ref var cClickEvent = ref world.AddComponent<PixelClickedEvent>();
                     var worldX = (int)pos.x;
                     var worldY = (int)pos.y;
+                    if (worldX < 0 || worldX >= cWorld.Width || worldY < 0 || worldY >= cWorld.Height)
+                    {
+                        continue;
+                    }
+                    ref var cClickEvent = ref world.AddComponent<PixelClickedEvent>();
                     cClickEvent.Pixel = cWorld.Pixels[worldX][worldY];
+                    cClickEvent.Button = cReq.Button;
                 }
+                return;
             }
         }
     }

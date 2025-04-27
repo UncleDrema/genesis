@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Geneses.ArtLife.ConstructingLife;
 using Genesis.Common.Components;
+using Scellecs.Morpeh;
 using UnityEngine;
 
 namespace Geneses.ArtLife
@@ -12,7 +14,13 @@ namespace Geneses.ArtLife
         
         public int Width { get; private set; }
         public int Height { get; private set; }
-        
+        public ToolType Tool { get; set; } = ToolType.Clear;
+        public DrawMode DrawMode { get; set; } = DrawMode.EnergySource;
+        public byte[] SpawningCellGenome { get; set; } = LifePresets.SimpleLife();
+        public int ToolSize { get; set; }
+        public int MaxAge { get; private set; }
+        public int MaxMutations { get; private set; }
+
         public ArtLifeWorld(IArtLifeConfig config)
         {
             _config = config;
@@ -57,6 +65,30 @@ namespace Geneses.ArtLife
                     current = current.Next;
                 }
             }
+            UpdateStats();
+        }
+
+        private void UpdateStats()
+        {
+            var zero = _cellList.Zero;
+            var current = zero.Next;
+            var maxAge = 0;
+            var maxMutations = 0;
+            while (current != zero)
+            {
+                var cell = current.Cell;
+                if (cell.Age > maxAge)
+                {
+                    maxAge = cell.Age;
+                }
+                if (cell.TotalMutations > maxMutations)
+                {
+                    maxMutations = cell.TotalMutations;
+                }
+                current = current.Next;
+            }
+            MaxAge = maxAge;
+            MaxMutations = maxMutations;
         }
 
         public void InitWorld(ref WorldComponent cWorld)
@@ -149,6 +181,30 @@ namespace Geneses.ArtLife
                     }
                 }
             }
+        }
+
+        public List<ArtLifePixel> GetPixelsInRange(ref WorldComponent cWorld, ArtLifePixel pixel, int toolSize)
+        {
+            // Вернем квадрат с центром в pixel размером toolSize
+            var pixels = new List<ArtLifePixel>();
+            var x = pixel.X;
+            var y = pixel.Y;
+            var width = cWorld.Width;
+            var height = cWorld.Height;
+            var halfSize = toolSize / 2;
+            var startX = Mathf.Max(0, x - halfSize);
+            var startY = Mathf.Max(0, y - halfSize);
+            var endX = Mathf.Min(width - 1, x + halfSize);
+            var endY = Mathf.Min(height - 1, y + halfSize);
+            for (var i = startX; i <= endX; i++)
+            {
+                for (var j = startY; j <= endY; j++)
+                {
+                    var pixelInRange = (ArtLifePixel) cWorld.Pixels[i][j];
+                    pixels.Add(pixelInRange);
+                }
+            }
+            return pixels;
         }
     }
 }
