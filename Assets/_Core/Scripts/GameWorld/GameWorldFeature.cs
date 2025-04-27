@@ -21,25 +21,36 @@ namespace Genesis.GameWorld
             RegisterRequest<PauseRequest>();
             RegisterRequest<ClickRequest>();
             RegisterRequest<InitializeGameWorldRequest>();
+            RegisterRequest<ResetGameWorldRequest>();
             
             AddInitializer(new InitializeTicksSystem(_config));
             
+            AddSystem(new ResetGameWorldSystem());
             AddSystem(new TransformClickRequestSystem());
             AddSystem(new PauseSystem());
-            AddSystem(new TickSystem());
+            AddSystem(new TickSystem(_config));
             AddSystem(new InitializeGameWorldSystem(_genesis, _config));
             
             RegisterEvent<WorldInitializedEvent>();
             RegisterEvent<TickEvent>();
             RegisterEvent<PixelClickedEvent>();
+            RegisterEvent<WorldResetEvent>();
         }
     }
 
     public class GameWorldLateFeature : LateUpdateFeature
     {
+        private readonly IGameWorldConfig _config;
+
+        public GameWorldLateFeature(IGameWorldConfig config)
+        {
+            _config = config;
+        }
+        
         protected override void Initialize()
         {
-            AddSystem(new DrawGameWorldSystem());
+            AddSystem(new DrawGameWorldSystem(_config));
+            AddSystem(new InitializeWorldAfterResetSystem());
         }
     }
 }

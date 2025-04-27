@@ -1,12 +1,9 @@
 ﻿using System;
-using Geneses.Blank;
-using Geneses.GameOfLife;
-using Geneses.TreeEv;
+using Geneses.ArtLife;
 using Genesis.Drawing;
 using Genesis.GameWorld;
 using Scellecs.Morpeh.Addons.Feature;
 using Scellecs.Morpeh.Addons.Feature.Unity;
-using Scellecs.Morpeh.Addons.Unity.VContainer;
 using VContainer;
 
 namespace Genesis.GameStartup
@@ -27,9 +24,9 @@ namespace Genesis.GameStartup
         {
             return new UpdateFeature[]
             {
-                _container.CreateFeature<GameWorldFeature>(),
-                _container.CreateFeature<GameOfLifeFeature>(),
-                _container.CreateFeature<DrawingFeature>(),
+                CreateFeature<GameWorldFeature>(_container),
+                CreateFeature<ArtLifeFeature>(_container),
+                CreateFeature<DrawingFeature>(_container)
             };
         }
 
@@ -42,8 +39,16 @@ namespace Genesis.GameStartup
         {
             return new LateUpdateFeature[]
             {
-                _container.CreateFeature<GameWorldLateFeature>()
+                CreateFeature<GameWorldLateFeature>(_container),
             };
+        }
+
+        private static TFeature CreateFeature<TFeature>(IObjectResolver container)
+            where TFeature : BaseFeature
+        {
+            var builder = new RegistrationBuilder(typeof(TFeature), Lifetime.Transient);
+            var registration = builder.Build();
+            return registration.SpawnInstance(container) as TFeature;
         }
     }
 }

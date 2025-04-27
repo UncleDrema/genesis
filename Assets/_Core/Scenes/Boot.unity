@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -142,13 +141,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6103091868253823481}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5473218218904536155
 MonoBehaviour:
@@ -199,3 +198,10 @@ MonoBehaviour:
   autoInjectGameObjects:
   - {fileID: 6103091868253823481}
   _sceneRepository: {fileID: 11400000, guid: dd357af377ecbe743bcc4eea7be8a1c1, type: 2}
+  _gameWorldConfig: {fileID: 11400000, guid: 3488af8c0b8bfb04499f1183dd84d403, type: 2}
+  _artLifeConfig: {fileID: 11400000, guid: 81d4f53b51efbd849bfffbac00f3d9b0, type: 2}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 3939478124721584356}

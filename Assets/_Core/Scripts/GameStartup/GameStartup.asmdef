@@ -1,0 +1,23 @@
+{
+    "name": "GameStartup",
+    "rootNamespace": "",
+    "references": [
+        "GUID:3377deebfb0acde45876d12c6e3d27cc",
+        "GUID:b0214a6008ed146ff8f122a6a9c2f6cc",
+        "GUID:603243ae3abf1b0429ea92c136a291fa",
+        "GUID:d0e3b94c7c8c7484aaaf99291b9c3543",
+        "GUID:4436a7741cf32944d9a8a273e8d83443",
+        "GUID:12d4bc54f5c7f2e409b280c5e8d9a6e6",
+        "GUID:a732e70d49b074245a1d5d0247c4c77f",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -16,5 +16,6 @@ namespace Genesis.Common.Components
         public int Height;
         public IPixel[][] Pixels;
         public int PixelSize;
+        public int DrawSkipFrames;
     }
 }

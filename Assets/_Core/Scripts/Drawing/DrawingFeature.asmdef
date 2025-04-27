@@ -3,7 +3,8 @@
     "rootNamespace": "Genesis",
     "references": [
         "GUID:3377deebfb0acde45876d12c6e3d27cc",
-        "GUID:324caed91501a9c47a04ebfd87b68794"
+        "GUID:324caed91501a9c47a04ebfd87b68794",
+        "GUID:948753f2305af1e44899e56f772a862b"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

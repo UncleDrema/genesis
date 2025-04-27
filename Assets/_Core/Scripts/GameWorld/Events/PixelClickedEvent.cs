@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.EventSystems;
 
 namespace Genesis.GameWorld.Events
 {
@@ -12,5 +13,6 @@ namespace Genesis.GameWorld.Events
     public struct PixelClickedEvent : IComponent
     {
         public IPixel Pixel;
+        public PointerEventData.InputButton Button;
     }
 }

@@ -265,7 +265,7 @@
       "hash": "af7bd4ecabaf6ea3f9e58ecc4352dd5296e5ef29"
     },
     "store.gameslab.morpeh.addons": {
-      "version": "https://github.com/MexicanMan/morpeh.addons.git?path=/Assets/morpeh.addons",
+      "version": "https://github.com/MexicanMan/morpeh.addons.git?path=/Assets/morpeh.addons#v2023.1.2",
       "depth": 0,
       "source": "git",
       "dependencies": {},
