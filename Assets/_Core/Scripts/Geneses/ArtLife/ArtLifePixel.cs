@@ -22,9 +22,25 @@ namespace Geneses.ArtLife
 
         private Color GetColor()
         {
-            if (World.Config.DrawMode == DrawMode.Default)
+            if (World.DrawMode == DrawMode.EnergySource)
             {
-                return GetDefaultColor();
+                return EnergySourceColor();
+            }
+            else if (World.DrawMode == DrawMode.Energy)
+            {
+                return EnergyColor();
+            }
+            else if (World.DrawMode == DrawMode.Age)
+            {
+                return AgeColor();
+            }
+            else if (World.DrawMode == DrawMode.Mutations)
+            {
+                return MutationsColor();
+            }
+            else if (World.DrawMode == DrawMode.Minerals)
+            {
+                return MineralsColor();
             }
             else
             {
@@ -32,26 +48,78 @@ namespace Geneses.ArtLife
             }
         }
 
-        private Color GetDefaultColor()
+        private Color EnergyColor()
         {
-            Color color;
+            if (Content != PixelContentType.Cell)
+            {
+                return GetNonCellColor();
+            }
+
+            var energyColorMap = World.Config.EnergyColorMap;
+            var maxEnergy = World.Config.MaxEnergy;
+            var energyFactor = Mathf.Clamp01((float)Cell!.Energy / maxEnergy);
+            return energyColorMap.GetColor(energyFactor);
+        }
+        
+        private Color AgeColor()
+        {
+            if (Content != PixelContentType.Cell)
+            {
+                return GetNonCellColor();
+            }
+            
+            var ageColorMap = World.Config.AgeColorMap;
+            var maxAge = World.MaxAge;
+            var ageFactor = Mathf.Clamp01((float)Cell!.Age / maxAge);
+            return ageColorMap.GetColor(ageFactor);
+        }
+        
+        private Color MutationsColor()
+        {
+            if (Content != PixelContentType.Cell)
+            {
+                return GetNonCellColor();
+            }
+            
+            var mutationsColorMap = World.Config.MutationsColorMap;
+            var maxMutations = World.MaxMutations;
+            var mutationsFactor = Mathf.Clamp01((float)Cell!.TotalMutations / maxMutations);
+            return mutationsColorMap.GetColor(mutationsFactor);
+        }
+        
+        private Color MineralsColor()
+        {
+            if (Content != PixelContentType.Cell)
+            {
+                return GetNonCellColor();
+            }
+            
+            var mineralsColorMap = World.Config.MineralsColorMap;
+            var maxMinerals = World.Config.MaxAccumulatedMinerals;
+            var mineralsFactor = Mathf.Clamp01(1f - (float)Cell!.AccumulatedMineralsCount / maxMinerals);
+            return mineralsColorMap.GetColor(mineralsFactor);
+        }
+
+        private Color GetNonCellColor()
+        {
             switch (Content)
             {
                 case PixelContentType.Empty:
-                    color = GetEmptyColor();
-                    break;
-                case PixelContentType.Cell:
-                    color = Cell!.GetColor();
-                    break;
+                    return GetEmptyColor();
                 case PixelContentType.Wall:
-                    color = UnityEngine.Color.black;
-                    break;
+                    return UnityEngine.Color.black;
                 case PixelContentType.Organic:
-                    color = UnityEngine.Color.grey;
-                    break;
+                    return UnityEngine.Color.grey;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private Color EnergySourceColor()
+        {
+            var color = Content == PixelContentType.Cell
+                ? Cell!.GetColor()
+                : GetNonCellColor();
 
             var radiationFactor = Mathf.Clamp01(RadiationLevel);
             color.r = Mathf.Lerp(color.r, 1f, radiationFactor);

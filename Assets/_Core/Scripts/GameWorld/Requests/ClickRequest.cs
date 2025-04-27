@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Genesis.GameWorld.Requests
 {
@@ -13,5 +14,6 @@ namespace Genesis.GameWorld.Requests
     internal struct ClickRequest : IComponent
     {
         public Vector2 ClickPosition;
+        public PointerEventData.InputButton Button;
     }
 }

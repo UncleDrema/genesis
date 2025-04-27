@@ -41,8 +41,14 @@ namespace Geneses.ArtLife
         [field: SerializeField, Range(0, 1f)]
         public float RadiationChance { get; set; } = 0.1f;
         [field: SerializeField]
-        public DrawMode DrawMode { get; set; } = DrawMode.Default;
-
+        public ColorMap EnergyColorMap { get; set; }
+        [field: SerializeField]
+        public ColorMap AgeColorMap { get; set; }
+        [field: SerializeField]
+        public ColorMap MutationsColorMap { get; set; }
+        [field: SerializeField]
+        public ColorMap MineralsColorMap { get; set; }
+        
         [Button]
         public void ResetValues()
         {

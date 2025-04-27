@@ -7,10 +7,20 @@ namespace Geneses.ArtLife.ConstructingLife
         public static byte[] SimpleLife()
         {
             var builder = new LifeBuilder();
-            
+            // Самая простая клетка, которая просто фотосинтезирует и дублируется
+
+            return builder
+                .Photosynthesis()
+                .Exit()
+                .Build();
+        }
+        
+        public static byte[] Algae()
+        {
+            var builder = new LifeBuilder();
             // Клетка должна делиться, если не окружена, а если окружена, то поддерживать себя живой
 
-            var genomeBuilder = builder
+            return builder
                 .CheckEnergy(16, "l_main", "l_critical")
                 .DeclareLabel("l_critical")
                 .Photosynthesis()
@@ -26,11 +36,8 @@ namespace Geneses.ArtLife.ConstructingLife
                 .Exit()
                 .DeclareLabel("l_dup")
                 .Duplicate()
-                .Exit();
-
-            var tokens = genomeBuilder.GetRawTokens();
-            var genome = genomeBuilder.Build();
-            return genome;
+                .Exit()
+                .Build();
         }
 
         public static byte[] PredatorLife()

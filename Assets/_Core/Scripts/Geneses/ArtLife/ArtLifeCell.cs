@@ -20,6 +20,7 @@ namespace Geneses.ArtLife
         public ArtLifePixel Position { get; set; } // позиция в мире
         public int Energy { get; private set; }
         public int Age { get; private set; }
+        public int TotalMutations { get; private set; } // Всего мутаций
         
         public int TotalPhotosynthesisEnergy { get; private set; } // Всего энергии, полученной от фотосинтеза
         public int TotalMineralEnergy { get; private set; } // Всего энергии, полученной от минералов
@@ -163,6 +164,7 @@ namespace Geneses.ArtLife
         {
             int mutationIndex = Random.Range(0, Genome.Length);
             Genome[mutationIndex] = (byte)Random.Range(0, 256);
+            TotalMutations++;
         }
 
         private void Die_Organic()
@@ -238,6 +240,7 @@ namespace Geneses.ArtLife
             {
                 var newCell = _world.CreateCell(freePosition);
                 newCell.CopyGenomeFrom(this);
+                newCell.TotalMutations = TotalMutations;
                 if (Random.value < _world.Config.DuplicateMutationChance)
                 {
                     newCell.Mutate();

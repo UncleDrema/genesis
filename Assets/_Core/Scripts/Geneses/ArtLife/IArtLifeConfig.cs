@@ -19,6 +19,9 @@
         int MaxMineralsToConvert { get; }
         float RadiationRadius { get; }
         float RadiationChance { get; }
-        public DrawMode DrawMode { get; }
+        ColorMap EnergyColorMap { get; }
+        ColorMap AgeColorMap { get; }
+        ColorMap MutationsColorMap { get; }
+        ColorMap MineralsColorMap { get; }
     }
 }

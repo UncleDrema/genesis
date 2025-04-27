@@ -2,6 +2,10 @@
 {
     public enum DrawMode
     {
-        Default,
+        EnergySource,
+        Energy,
+        Age,
+        Mutations,
+        Minerals,
     }
 }
